@@ -9,7 +9,8 @@ export fn log_analyze logs
     counts: {}
     for k in classified
         c: get counts k
-        if is_nil c; c: 0
+        if is_nil c
+            c: 0
         set counts k (c + 1)
     
     summary: summarize ("Log analysis: " ++ (to_str (len logs)) ++ " lines. " ++ (to_str (get counts "critical")) ++ " critical, " ++ (to_str (get counts "error")) ++ " errors.")

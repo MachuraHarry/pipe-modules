@@ -2,7 +2,8 @@
 -- Usage: import "..."; text > analyze_sentiment
 
 export fn analyze_sentiment text
-    classify text ["positive", "neutral", "negative"]
+    levels: ["positive", "neutral", "negative"]
+    classify text levels
 
 export fn batch_sentiment texts
     ai_batch "Classify sentiment as: positive, neutral, negative. Answer ONLY with the category." texts
@@ -12,6 +13,7 @@ export fn sentiment_report texts
     counts: {}
     for r in results
         c: get counts r
-        if is_nil c; c: 0
+        if is_nil c
+            c: 0
         set counts r (c + 1)
     counts
