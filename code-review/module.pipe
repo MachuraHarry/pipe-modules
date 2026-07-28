@@ -1,8 +1,5 @@
--- Code Review Module
--- Usage: import "..."; code > review_code
+export fn review code
+    ai_chat "You are a senior code reviewer. Analyze for: bugs, performance, readability, security. Give 3 specific suggestions." code
 
-export fn review_code code
-    ai_chat "You are a senior code reviewer. Analyze the code for: bugs, performance, readability, security. Give 3 specific suggestions." code
-
-export fn rate_code code
+export fn rate code
     ask "Rate this code 1-10 based on quality. Answer ONLY with the number." code

@@ -1,0 +1,8 @@
+export fn changelog commits
+    summary: summarize ("These are git commits from a software project. Write a concise changelog summarizing the key changes:\n\n" ++ commits)
+    summary
+
+export fn changelog_bilingual commits
+    en: changelog commits
+    de: translate en "German"
+    en ++ "\n\n---\n\n" ++ de

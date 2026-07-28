@@ -1,49 +1,36 @@
-# Pipe Modules — Curated Pipeline Library
+# Pipe Modules — Curated AI Pipeline Library
 
-A collection of reusable Pipe (SPR) modules for the Semantic Pipeline Runtime.
+7 reusable Pipe (SPR) modules for the Semantic Pipeline Runtime.
+
+## Available Modules
+
+| # | Module | Description | Functions |
+|---|--------|-------------|-----------|
+| 1 | `log-analyzer` | Log classification & summarization | `log_analyze`, `log_summarize` |
+| 2 | `sentiment` | Sentiment analysis | `sentiment`, `batch_sentiment`, `sentiment_stats` |
+| 3 | `code-review` | AI code review | `review`, `rate` |
+| 4 | `translate-batch` | Batch translation | `translate_batch`, `translate` |
+| 5 | `incident-report` | Security incident analysis | `incident_analyze`, `incident_severity` |
+| 6 | `changelog-gen` | AI changelog generation | `changelog`, `changelog_bilingual` |
+| 7 | `email-classifier` | Email classification | `classify_email`, `email_batch`, `email_urgent` |
 
 ## Usage
 
 ```pipe
-import "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/main/log-analyzer/module.pipe"
+import "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
 
-read_file "errors.log" > log_analyze > save "report.md"
+tweets: read_lines "tweets.txt"
+stats: sentiment_stats tweets
+print stats
 ```
 
 ## Install via CLI
 
 ```bash
-pipe -get log-analyzer
-pipe -get https://raw.githubusercontent.com/MachuraHarry/pipe-modules/main/log-analyzer/module.pipe
+pipe -get sentiment
 ```
 
-## Available Modules
-
-| Module | Description |
-|--------|-------------|
-| `log-analyzer` | Classify, summarize, and report on log files |
-| `sentiment` | Analyze sentiment of texts |
-| `code-review` | AI-powered code review |
-| `translate` | Batch translation to multiple languages |
-| `incident-report` | Security incident analysis & reporting |
-| `summary` | Text summarization utilities |
-
-## Module Structure
-
-Each module is a self-contained `.pipe` file with exported functions.
-
-```
-pipe-modules/
-├── log-analyzer/
-│   ├── module.pipe
-│   └── README.md
-├── sentiment/
-│   ├── module.pipe
-│   └── README.md
-└── registry.json
-```
-
-## Contributing
+## Contribute
 
 1. Create a folder with your module name
 2. Add `module.pipe` with exported functions

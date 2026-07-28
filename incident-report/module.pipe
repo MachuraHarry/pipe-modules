@@ -1,0 +1,31 @@
+export fn incident_analyze logs
+    klassen: ai_batch "Security-Analyst: Classify this log line as: normal, attack, scan. Answer ONLY with the category." logs
+    counts: {}
+    for k in klassen
+        c: get counts k
+        if is_nil c
+            c: 0
+        set counts k (c + 1)
+
+    stats: ""
+    for k in (keys counts)
+        stats: stats ++ k ++ ":" ++ (to_str (get counts k)) ++ " "
+    
+    analyze: ai_chat "You are a Security Incident Responder. Analyze these log statistics. Is there an active attack? What is the attack vector? Give 3 immediate actions." stats
+    analyze
+
+export fn incident_severity logs
+    klassen: ai_batch "Classify this log line as: normal, attack, scan. Answer ONLY with the category." logs
+    counts: {}
+    for k in klassen
+        c: get counts k
+        if is_nil c
+            c: 0
+        set counts k (c + 1)
+    
+    stats: ""
+    for k in (keys counts)
+        stats: stats ++ k ++ ":" ++ (to_str (get counts k)) ++ " "
+
+    levels: ["low", "medium", "high", "critical"]
+    classify stats levels

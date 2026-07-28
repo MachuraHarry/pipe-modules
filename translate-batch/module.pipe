@@ -1,0 +1,9 @@
+export fn translate_batch texts target_lang
+    prompts: []
+    for t in texts
+        push prompts ("Translate this to " ++ target_lang ++ ": " ++ t)
+    ai_batch "You are a professional translator. Translate the given text. Answer ONLY with the translation, nothing else." prompts
+
+export fn translate text target_lang
+    prompt: "Translate this to " ++ target_lang ++ ": " ++ text
+    generate prompt

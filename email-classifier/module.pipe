@@ -1,0 +1,16 @@
+export fn classify_email email
+    labels: ["urgent", "important", "newsletter", "spam", "personal"]
+    classify email labels
+
+export fn email_batch emails
+    ai_batch "Classify this email as: urgent, important, newsletter, spam, personal. Answer ONLY with the category." emails
+
+export fn email_urgent emails
+    klassen: email_batch emails
+    urgent: []
+    i: 0
+    for k in klassen
+        if k == "urgent"
+            push urgent (at emails i)
+        i: i + 1
+    urgent
