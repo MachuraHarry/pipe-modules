@@ -1,0 +1,19 @@
+{
+  "modules": {
+    "log-analyzer": {
+      "description": "AI-powered log file analysis, classification, and summarization",
+      "functions": ["log_analyze", "log_classify"],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/main/log-analyzer/module.pipe"
+    },
+    "sentiment": {
+      "description": "Sentiment analysis for texts (positive/neutral/negative)",
+      "functions": ["analyze_sentiment", "batch_sentiment", "sentiment_report"],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/main/sentiment/module.pipe"
+    },
+    "code-review": {
+      "description": "AI-powered code review with ratings and suggestions",
+      "functions": ["review_code", "rate_code"],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/main/code-review/module.pipe"
+    }
+  }
+}

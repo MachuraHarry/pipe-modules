@@ -1,0 +1,20 @@
+-- Log Analyzer Module
+-- Usage: import "..."; logs > log_analyze > save "report.md"
+
+export fn log_analyze logs
+    print "Analyzing " ++ (to_str (len logs)) ++ " log lines..."
+    
+    classified: ai_batch "Classify this log line as: normal, warning, error, critical. Answer ONLY with the category." logs
+    
+    counts: {}
+    for k in classified
+        c: get counts k
+        if is_nil c; c: 0
+        set counts k (c + 1)
+    
+    summary: summarize ("Log analysis: " ++ (to_str (len logs)) ++ " lines. " ++ (to_str (get counts "critical")) ++ " critical, " ++ (to_str (get counts "error")) ++ " errors.")
+    
+    summary
+
+export fn log_classify logs
+    ai_batch "Classify this log line as: normal, warning, error, critical. Answer ONLY with the category." logs
