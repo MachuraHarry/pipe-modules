@@ -34,6 +34,11 @@
       "description": "Email classification (urgent/important/newsletter/spam/personal)",
       "functions": ["classify_email", "email_batch", "email_urgent"],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
+    },
+    "date-formatter": {
+      "description": "Date/time utilities — formatting, relative time, weekend checks",
+      "functions": ["format_now", "relative_time", "is_weekend"],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
     }
   }
 }

@@ -1,0 +1,19 @@
+export fn format_now layout
+    ts: now 0
+    format_time ts layout
+
+export fn relative_time ts
+    now_ts: now 0
+    diff: now_ts - ts
+    if diff < 60
+        "gerade eben"
+    else if diff < 3600
+        (to_str (diff / 60)) ++ " Minuten"
+    else if diff < 86400
+        (to_str (diff / 3600)) ++ " Stunden"
+    else
+        (to_str (diff / 86400)) ++ " Tage"
+
+export fn is_weekend ts
+    day: format_time ts "Monday"
+    (day == "Saturday") || (day == "Sunday")
