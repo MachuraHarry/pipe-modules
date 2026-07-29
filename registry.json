@@ -73,8 +73,8 @@
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
     },
     "parallel-runner": {
-      "description": "Run multiple functions or AI queries in parallel using the >> operator",
-      "functions": ["parallel_map", "parallel_ask", "race"],
+      "description": "Run multiple AI queries in parallel using the >> operator",
+      "functions": ["ask_many", "summarize_many", "translate_many"],
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
