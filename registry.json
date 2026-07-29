@@ -3,42 +3,82 @@
     "log-analyzer": {
       "description": "AI-powered log file analysis, classification, and summarization",
       "functions": ["log_analyze", "log_summarize"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
     },
     "sentiment": {
       "description": "Sentiment analysis for texts (positive/neutral/negative)",
       "functions": ["sentiment", "batch_sentiment", "sentiment_stats"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
     },
     "code-review": {
       "description": "AI-powered code review with ratings and suggestions",
       "functions": ["review", "rate"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe"
     },
     "translate-batch": {
       "description": "Batch translation to any language via AI",
       "functions": ["translate_batch", "translate"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe"
     },
     "incident-report": {
       "description": "Security incident analysis, severity classification, and response planning",
       "functions": ["incident_analyze", "incident_severity"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe"
     },
     "changelog-gen": {
       "description": "AI-generated changelogs from git commits (bilingual support)",
       "functions": ["changelog", "changelog_bilingual"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/changelog-gen/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/changelog-gen/module.pipe"
     },
     "email-classifier": {
       "description": "Email classification (urgent/important/newsletter/spam/personal)",
       "functions": ["classify_email", "email_batch", "email_urgent"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
     },
     "date-formatter": {
       "description": "Date/time utilities — formatting, relative time, weekend checks",
       "functions": ["format_now", "relative_time", "is_weekend"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
+      },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
+    },
+    "parallel-runner": {
+      "description": "Run multiple functions or AI queries in parallel using the >> operator",
+      "functions": ["parallel_map", "parallel_ask", "race"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
+      }
     }
   }
 }

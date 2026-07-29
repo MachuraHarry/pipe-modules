@@ -1,0 +1,27 @@
+-- parallel-runner v1.0.0
+-- Run multiple functions or AI queries in parallel using the >> operator.
+-- Requires: Pipe v0.6.0+
+
+export fn ask_many questions
+    results: []
+    for q in questions
+        a: q
+            >> ask
+        results: push results a
+    results
+
+export fn summarize_many texts
+    results: []
+    for t in texts
+        s: t
+            >> summarize
+        results: push results s
+    results
+
+export fn translate_many texts target
+    results: []
+    for t in texts
+        tr: t
+            >> translate target
+        results: push results tr
+    results
