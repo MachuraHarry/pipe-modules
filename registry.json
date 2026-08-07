@@ -80,6 +80,15 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
       }
     },
+    "pipe-date": {
+      "description": "DateTime utilities — parsing, formatting, arithmetic, relative time, weekend checks",
+      "functions": ["parse", "format", "add_days", "add_hours", "add_minutes", "diff_days", "diff_hours", "part", "now_iso", "is_before", "is_after", "is_between", "is_weekend", "is_weekday", "is_today", "relative"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe"
+    },
     "jpipe": {
       "description": "JSON path query — navigate, pick, flatten JSON/Map structures with .path[0].key[*] syntax",
       "functions": ["jp", "jpick", "jkeys", "jflatten"],

@@ -1,0 +1,144 @@
+-- ============================================================
+-- pipe-date - DateTime utilities for Pipe
+-- Exports: parse, add, diff, format, part, now_iso, is_weekend, relative
+-- Requires: Pipe v0.8+ (parse_date builtin)
+-- ============================================================
+
+DAY: 86400
+HOUR: 3600
+
+--- === Parsing & Formatting === ---
+
+export fn parse date_str layout
+    parse_date date_str layout
+
+export fn format ts layout
+    format_time ts layout
+
+export fn now_iso _
+    format_time now "2006-01-02T15:04:05"
+
+--- === Date Parts === ---
+
+export fn part ts part_name
+    if part_name == "year"
+        return to_num (format_time ts "2006")
+    else if part_name == "month"
+        return to_num (format_time ts "01")
+    else if part_name == "day"
+        return to_num (format_time ts "02")
+    else if part_name == "hour"
+        return to_num (format_time ts "15")
+    else if part_name == "minute"
+        return to_num (format_time ts "04")
+    else if part_name == "second"
+        return to_num (format_time ts "05")
+    else if part_name == "weekday"
+        wd: format_time ts "Mon"
+        if wd == "Sun"
+            return 0
+        else if wd == "Mon"
+            return 1
+        else if wd == "Tue"
+            return 2
+        else if wd == "Wed"
+            return 3
+        else if wd == "Thu"
+            return 4
+        else if wd == "Fri"
+            return 5
+        else if wd == "Sat"
+            return 6
+        return 0
+    else if part_name == "yearday"
+        w: format_time ts "January"
+        if w == "January"
+            return to_num (format_time ts "002")
+        return 0
+    0
+
+--- === Arithmetic === ---
+
+export fn add_days ts days
+    ts + (days * DAY)
+
+export fn add_hours ts hours
+    ts + (hours * HOUR)
+
+export fn add_minutes ts mins
+    ts + (mins * 60)
+
+export fn diff_days ts1 ts2
+    (ts1 - ts2) / DAY
+
+export fn diff_hours ts1 ts2
+    (ts1 - ts2) / HOUR
+
+--- === Comparison === ---
+
+export fn is_before ts1 ts2
+    ts1 < ts2
+
+export fn is_after ts1 ts2
+    ts1 > ts2
+
+export fn is_between ts check_start check_end
+    ts >= check_start && ts <= check_end
+
+--- === Day Checks === ---
+
+export fn is_weekend ts
+    wd: part ts "weekday"
+    wd == 0 || wd == 6
+
+export fn is_weekday ts
+    !(is_weekend ts)
+
+export fn is_today ts
+    today: now
+    format_time ts "2006-01-02" == format_time today "2006-01-02"
+
+--- === Relative Time === ---
+
+export fn relative ts
+    diff: now - ts
+    if diff < 0
+        s: "in "
+        s: s ++ (relative_abs (0 - diff))
+        return s
+    if diff < 60
+        return "just now"
+    s: relative_abs diff
+    s: s ++ " ago"
+    s
+
+fn relative_abs seconds
+    if seconds < 120
+        return "1 minute"
+    if seconds < HOUR
+        s: to_str (seconds / 60)
+        s: s ++ " minutes"
+        return s
+    if seconds < 2 * HOUR
+        return "1 hour"
+    if seconds < DAY
+        s: to_str (seconds / HOUR)
+        s: s ++ " hours"
+        return s
+    if seconds < 2 * DAY
+        return "1 day"
+    if seconds < 30 * DAY
+        s: to_str (seconds / DAY)
+        s: s ++ " days"
+        return s
+    if seconds < 60 * DAY
+        return "1 month"
+    if seconds < 365 * DAY
+        s: to_str (seconds / (30 * DAY))
+        s: s ++ " months"
+        return s
+    if seconds < 730 * DAY
+        return "1 year"
+    s: to_str (seconds / (365 * DAY))
+    s: s ++ " years"
+    s
