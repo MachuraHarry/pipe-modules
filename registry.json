@@ -89,6 +89,15 @@
       },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
     },
+    "pipe-tpl": {
+      "description": "Template engine — {{ var }}, {{ if }}, {{ for }}, filters, comments",
+      "functions": ["render", "render_file"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe"
+    },
     "pipe-test": {
       "description": "Better assertions for Pipe test blocks — expect_eq, expect_truthy, expect_contains, expect_type, and more",
       "functions": ["expect_eq", "expect_ne", "expect_truthy", "expect_falsy", "expect_nil", "expect_not_nil", "expect_gt", "expect_lt", "expect_gte", "expect_lte", "expect_contains", "expect_type", "expect_error", "expect_no_error", "with_hooks"],

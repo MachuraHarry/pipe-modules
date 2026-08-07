@@ -1,0 +1,255 @@
+-- ============================================================
+-- pipe-tpl - Template engine for Pipe
+-- Exports: render, render_file
+-- Syntax: {{ var }}, {{ if }}...{{ end }}, {{ for }}...{{ end }}
+-- ============================================================
+
+--- === Tokenizer === ---
+
+fn tokenize tpl
+    tokens: []
+    i: 0
+    n: len tpl
+    while i < n
+        -- Check for {{
+        if i + 1 < n
+            c0: at tpl i
+            c1: at tpl (i + 1)
+            if c0 == "{" && c1 == "{"
+                i: i + 2
+                -- Check for --
+                if i + 1 < n
+                    d0: at tpl i
+                    d1: at tpl (i + 1)
+                    if d0 == "-" && d1 == "-"
+                        -- Comment: skip to --}}
+                        i: i + 2
+                        while i + 3 < n
+                            if (at tpl i) == "-" && (at tpl (i + 1)) == "-" && (at tpl (i + 2)) == "}" && (at tpl (i + 3)) == "}"
+                                i: i + 4
+                                break
+                            i: i + 1
+                        continue
+
+                -- Read content until }}
+                start: i
+                depth: 1
+                while i < n && depth > 0
+                    if i + 1 < n
+                        a: at tpl i
+                        b: at tpl (i + 1)
+                        if a == "{" && b == "{"
+                            depth: depth + 1
+                            i: i + 2
+                            continue
+                        if a == "}" && b == "}"
+                            depth: depth - 1
+                            if depth == 0
+                                break
+                    i: i + 1
+
+                content: slice tpl start i
+                content: trim content
+                i: i + 2
+
+                -- Classify the expression
+                if content == "end"
+                    push tokens {t: "end"}
+                else if content == "else"
+                    push tokens {t: "else"}
+                else if (len content) >= 2 && (slice content 0 2) == "if"
+                    cond: slice content 2 (len content)
+                    cond: trim cond
+                    push tokens {t: "if", v: cond}
+                else if (len content) >= 3 && (slice content 0 3) == "for"
+                    rest: slice content 3 (len content)
+                    rest: trim rest
+                    -- Parse "var in expr"
+                    in_pos: index_of rest " in "
+                    if in_pos > 0
+                        var_name: slice rest 0 in_pos
+                        var_name: trim var_name
+                        iter_expr: slice rest (in_pos + 4) (len rest)
+                        iter_expr: trim iter_expr
+                        push tokens {t: "for", var: var_name, v: iter_expr}
+                    else
+                        push tokens {t: "expr", v: content}
+                else
+                    push tokens {t: "expr", v: content}
+                continue
+
+        -- Plain text
+        start: i
+        while i < n
+            if i + 1 < n
+                if (at tpl i) == "{" && (at tpl (i + 1)) == "{"
+                    break
+            i: i + 1
+        if i > start
+            push tokens {t: "text", v: (slice tpl start i)}
+    tokens
+
+--- === Helpers === ---
+
+fn copy_map src
+    dst: {}
+    ks: keys src
+    i: 0
+    while i < (len ks)
+        k: at ks i
+        set dst k (get src k)
+        i: i + 1
+    dst
+
+fn resolve data path
+    parts: split path "."
+    cur: data
+    j: 0
+    while j < (len parts)
+        p: at parts j
+        p: trim p
+        cur: get cur p
+        if cur == nil
+            return ""
+        j: j + 1
+    cur
+
+fn apply_filter val filter_name
+    fname: trim filter_name
+    if fname == "len"
+        return len val
+    else if fname == "upper"
+        return upper val
+    else if fname == "lower"
+        return lower val
+    else if fname == "to_str"
+        return to_str val
+    else if fname == "keys"
+        return keys val
+    else if fname == "type"
+        return type_of val
+    val
+
+fn eval_expr expr_str data
+    -- Split by |
+    parts: split expr_str "|"
+    first: trim (at parts 0)
+    -- Try numeric
+    if first == "true"
+        return true
+    if first == "false"
+        return false
+    if first == "nil"
+        return nil
+    val: resolve data first
+    k: 1
+    while k < (len parts)
+        fname: at parts k
+        val: apply_filter val fname
+        k: k + 1
+    val
+
+fn to_str_any val
+    if val == nil
+        return ""
+    if type_of val == "STRING"
+        return val
+    to_str val
+
+fn find_matching_end tokens start_idx
+    depth: 1
+    idx: start_idx + 1
+    while idx < (len tokens)
+        t: at tokens idx
+        tp: get t "t"
+        if tp == "if" || tp == "for"
+            depth: depth + 1
+        else if tp == "end"
+            depth: depth - 1
+            if depth == 0
+                return idx
+        idx: idx + 1
+    start_idx
+
+fn find_else tokens start_idx
+    depth: 1
+    idx: start_idx + 1
+    while idx < (len tokens)
+        t: at tokens idx
+        tp: get t "t"
+        if tp == "if" || tp == "for"
+            depth: depth + 1
+        else if tp == "end"
+            depth: depth - 1
+            if depth == 0
+                return -1
+        else if tp == "else" && depth == 1
+            return idx
+        idx: idx + 1
+    -1
+
+--- === Evaluator === ---
+
+fn eval_tokens tokens start_idx data stop_at_end
+    out: ""
+    idx: start_idx
+    tn: len tokens
+    while idx < tn
+        t: at tokens idx
+        tp: get t "t"
+
+        if tp == "text"
+            out: out ++ (get t "v")
+
+        else if tp == "expr"
+            val: eval_expr (get t "v") data
+            out: out ++ (to_str_any val)
+
+        else if tp == "if"
+            cond: eval_expr (get t "v") data
+            else_idx: find_else tokens idx
+            end_idx: find_matching_end tokens idx
+
+            if cond
+                -- Render if body
+                body_end: end_idx
+                if else_idx > 0
+                    body_end: else_idx
+                out: out ++ (eval_tokens tokens (idx + 1) data false)
+            else if else_idx > 0
+                -- Render else body
+                out: out ++ (eval_tokens tokens (else_idx + 1) data false)
+
+            idx: end_idx
+
+        else if tp == "for"
+            varname: get t "var"
+            items: eval_expr (get t "v") data
+            end_idx: find_matching_end tokens idx
+
+            if type_of items == "LIST"
+                fi: 0
+                while fi < (len items)
+                    item: at items fi
+                    iter_data: copy_map data
+                    set iter_data varname item
+                    out: out ++ (eval_tokens tokens (idx + 1) iter_data false)
+                    fi: fi + 1
+
+            idx: end_idx
+
+        else if tp == "end"
+            if stop_at_end
+                break
+        idx: idx + 1
+    out
+
+--- === Public API === ---
+
+export fn render tpl data
+    tokens: tokenize tpl
+    eval_tokens tokens 0 data false
+
+export fn render_file path data
+    tpl: read_file path
+    render tpl data
