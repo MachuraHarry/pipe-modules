@@ -1940,7 +1940,8 @@ fn exec_select db node
     ji: 1
     while ji < (len from_list)
       join_node: at from_list ji
-      if (ast_type join_node) == "join"
+      jt: ast_type join_node
+      if jt == "inner" || jt == "left" || jt == "right"
         tab_ref: ast_get join_node "table"
         jtable: get_table db (ast_get tab_ref "name")
         if jtable == nil
