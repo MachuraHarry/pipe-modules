@@ -66,10 +66,10 @@ fn build_create name cols
         c: at cols i
         if i > 0
             sql: sql ++ ", "
-        col_sql: (get c "name")
-        col_sql: col_sql ++ " "
-        col_sql: col_sql ++ (get c "type")
-        sql: sql ++ col_sql
+        cs: (get c "name")
+        cs: cs ++ " "
+        cs: cs ++ (get c "type")
+        sql: sql ++ cs
         i: i + 1
     sql: sql ++ ")"
     sql
@@ -78,10 +78,10 @@ fn build_create name cols
 
 fn qval val
     if type_of val == "STRING"
-        result: "'"
-        result: result ++ val
-        result: result ++ "'"
-        return result
+        r: "'"
+        r: r ++ val
+        r: r ++ "'"
+        return r
     if type_of val == "INTEGER"
         return (to_str val)
     if type_of val == "NIL"
@@ -128,13 +128,13 @@ fn build_select q
         k: 0
         while k < (len joins)
             j: at joins k
-            jpart: " "
-            jpart: jpart ++ (get j "type")
-            jpart: jpart ++ " JOIN "
-            jpart: jpart ++ (get j "table")
-            jpart: jpart ++ " ON "
-            jpart: jpart ++ (get j "on")
-            sql: sql ++ jpart
+            jp: " "
+            jp: jp ++ (get j "type")
+            jp: jp ++ " JOIN "
+            jp: jp ++ (get j "table")
+            jp: jp ++ " ON "
+            jp: jp ++ (get j "on")
+            sql: sql ++ jp
             k: k + 1
 
     if wheres != nil
@@ -156,11 +156,11 @@ fn build_select q
             if k > 0
                 sql: sql ++ ", "
             o: at orders k
-            ocol: get o "col"
-            odir: get o "dir"
-            sql: sql ++ ocol
+            oc: get o "col"
+            od: get o "dir"
+            sql: sql ++ oc
             sql: sql ++ " "
-            sql: sql ++ odir
+            sql: sql ++ od
             k: k + 1
 
     if lim != nil
@@ -192,19 +192,19 @@ fn build_where wheres
     sql
 
 fn build_insert table_name data
-    cpart: ""
-    vpart: ""
+    cp: ""
+    vp: ""
     ks: keys data
     k: 0
     while k < (len ks)
         key: at ks k
         if k > 0
-            cpart: cpart ++ ", "
-            vpart: vpart ++ ", "
-        cpart: cpart ++ key
-        vpart: vpart ++ (qval (get data key))
+            cp: cp ++ ", "
+            vp: vp ++ ", "
+        cp: cp ++ key
+        vp: vp ++ (qval (get data key))
         k: k + 1
-    "INSERT INTO " ++ table_name ++ " (" ++ cpart ++ ") VALUES (" ++ vpart ++ ")"
+    "INSERT INTO " ++ table_name ++ " (" ++ cp ++ ") VALUES (" ++ vp ++ ")"
 
 fn build_update table_name data wheres
     sql: "UPDATE " ++ table_name ++ " SET "
@@ -293,15 +293,15 @@ export fn join q table_name on_clause jtype
     r: as_query q
     if jtype == nil
         jtype: "INNER"
-    jtname: table_name
+    jtn: table_name
     if type_of table_name == "MAP"
         tn: get table_name "name"
         if tn != nil
-            jtname: tn
+            jtn: tn
     joins: get r "joins"
     if joins == nil
         joins: []
-    push joins {type: jtype, table: jtname, on: on_clause}
+    push joins {type: jtype, table: jtn, on: on_clause}
     set r "joins" joins
     r
 
@@ -352,8 +352,8 @@ export fn first q_or_td h
 export fn count q_or_td h
     r: as_query q_or_td
     set r "table" (tname r)
-    clist: ["COUNT(*) as cnt"]
-    set r "columns" clist
+    cl: ["COUNT(*) as cnt"]
+    set r "columns" cl
     sql: build_select r
     rows: db_query h sql
     if (len rows) > 0

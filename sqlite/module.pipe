@@ -1972,6 +1972,10 @@ fn exec_select db node
             jc: 0
             while jc < (len jcolnames)
               cname: at jcolnames jc
+              -- Add unqualified name if not already present (first table has priority)
+              if get combined cname == nil
+                  set combined cname (get jr cname)
+              -- Always add fully qualified alias.name
               set combined (jalias ++ "." ++ cname) (get jr cname)
               jc: jc + 1
 
