@@ -1,0 +1,375 @@
+import "sqlite.pipe"
+
+--- === Schema === ---
+
+export fn table h name
+    {name: name, columns: []}
+
+export fn col td name type
+    if type_of td != "MAP"
+        return td
+    cols: get td "columns"
+    if cols == nil
+        cols: []
+    push cols {name: name, type: type}
+    set td "columns" cols
+    td
+
+--- === Migration === ---
+
+export fn migrate h td
+    name: get td "name"
+    cols: get td "columns"
+
+    exists: true
+    try
+        db_query h ("SELECT 1 FROM " ++ name ++ " LIMIT 1")
+    catch e
+        exists: false
+
+    if !exists
+        sql: build_create name cols
+        db_exec h sql
+        return h
+
+    current_cols: get_info_columns h name
+    i: 0
+    while i < (len cols)
+        c: at cols i
+        cname: get c "name"
+        ctype: get c "type"
+        if !(info_has current_cols cname)
+            alter_sql: "ALTER TABLE " ++ name ++ " ADD COLUMN " ++ cname ++ " " ++ ctype
+            db_exec h alter_sql
+        i: i + 1
+    h
+
+fn get_info_columns h table_name
+    rows: db_query h ("SELECT * FROM " ++ table_name ++ " LIMIT 1")
+    if (len rows) == 0
+        return []
+    ks: keys (at rows 0)
+    ks
+
+fn info_has cols name
+    i: 0
+    while i < (len cols)
+        if (at cols i) == name
+            return true
+        i: i + 1
+    false
+
+fn build_create name cols
+    sql: "CREATE TABLE " ++ name ++ " ("
+    i: 0
+    while i < (len cols)
+        c: at cols i
+        if i > 0
+            sql: sql ++ ", "
+        col_sql: (get c "name")
+        col_sql: col_sql ++ " "
+        col_sql: col_sql ++ (get c "type")
+        sql: sql ++ col_sql
+        i: i + 1
+    sql: sql ++ ")"
+    sql
+
+--- === SQL Helpers === ---
+
+fn qval val
+    if type_of val == "STRING"
+        result: "'"
+        result: result ++ val
+        result: result ++ "'"
+        return result
+    if type_of val == "INTEGER"
+        return (to_str val)
+    if type_of val == "NIL"
+        return "NULL"
+    to_str val
+
+fn tname q
+    n: get q "name"
+    if n != nil
+        return n
+    get q "table"
+
+--- === SQL Builder === ---
+
+fn build_select q
+    t: tname q
+    cols: get q "columns"
+    wheres: get q "where_clauses"
+    orders: get q "order_bys"
+    groups: get q "group_bys"
+    lim: get q "limit_val"
+    off: get q "offset_val"
+    joins: get q "joins"
+    dist: get q "distinct"
+
+    sql: "SELECT "
+    if dist
+        sql: sql ++ "DISTINCT "
+
+    if cols == nil
+        sql: sql ++ "*"
+    else
+        k: 0
+        while k < (len cols)
+            if k > 0
+                sql: sql ++ ", "
+            sql: sql ++ (at cols k)
+            k: k + 1
+
+    sql: sql ++ " FROM "
+    sql: sql ++ t
+
+    if joins != nil
+        k: 0
+        while k < (len joins)
+            j: at joins k
+            jpart: " "
+            jpart: jpart ++ (get j "type")
+            jpart: jpart ++ " JOIN "
+            jpart: jpart ++ (get j "table")
+            jpart: jpart ++ " ON "
+            jpart: jpart ++ (get j "on")
+            sql: sql ++ jpart
+            k: k + 1
+
+    if wheres != nil
+        sql: sql ++ build_where wheres
+
+    if groups != nil
+        sql: sql ++ " GROUP BY "
+        k: 0
+        while k < (len groups)
+            if k > 0
+                sql: sql ++ ", "
+            sql: sql ++ (at groups k)
+            k: k + 1
+
+    if orders != nil
+        sql: sql ++ " ORDER BY "
+        k: 0
+        while k < (len orders)
+            if k > 0
+                sql: sql ++ ", "
+            o: at orders k
+            ocol: get o "col"
+            odir: get o "dir"
+            sql: sql ++ ocol
+            sql: sql ++ " "
+            sql: sql ++ odir
+            k: k + 1
+
+    if lim != nil
+        sql: sql ++ " LIMIT "
+        sql: sql ++ (to_str lim)
+
+    if off != nil
+        sql: sql ++ " OFFSET "
+        sql: sql ++ (to_str off)
+
+    sql
+
+fn build_where wheres
+    sql: " WHERE "
+    k: 0
+    while k < (len wheres)
+        w: at wheres k
+        logic: get w "logic"
+        if k > 0 && logic != ""
+            sql: sql ++ " "
+            sql: sql ++ logic
+            sql: sql ++ " "
+        sql: sql ++ (get w "col")
+        sql: sql ++ " "
+        sql: sql ++ (get w "op")
+        sql: sql ++ " "
+        sql: sql ++ (qval (get w "val"))
+        k: k + 1
+    sql
+
+fn build_insert table_name data
+    cpart: ""
+    vpart: ""
+    ks: keys data
+    k: 0
+    while k < (len ks)
+        key: at ks k
+        if k > 0
+            cpart: cpart ++ ", "
+            vpart: vpart ++ ", "
+        cpart: cpart ++ key
+        vpart: vpart ++ (qval (get data key))
+        k: k + 1
+    "INSERT INTO " ++ table_name ++ " (" ++ cpart ++ ") VALUES (" ++ vpart ++ ")"
+
+fn build_update table_name data wheres
+    sql: "UPDATE " ++ table_name ++ " SET "
+    ks: keys data
+    k: 0
+    while k < (len ks)
+        key: at ks k
+        if k > 0
+            sql: sql ++ ", "
+        sql: sql ++ key
+        sql: sql ++ " = "
+        sql: sql ++ (qval (get data key))
+        k: k + 1
+    if wheres != nil
+        sql: sql ++ build_where wheres
+    sql
+
+fn build_delete table_name wheres
+    sql: "DELETE FROM " ++ table_name
+    if wheres != nil
+        sql: sql ++ build_where wheres
+    sql
+
+--- === Query Object === ---
+
+fn as_query thing
+    if type_of thing == "MAP"
+        t: get thing "table"
+        if t != nil
+            return thing
+        n: get thing "name"
+        if n != nil
+            cols: get thing "columns"
+            if cols != nil
+                return {table: n}
+    {table: thing}
+
+fn add_where q col op val logic
+    r: as_query q
+    w: get r "where_clauses"
+    if w == nil
+        w: []
+    push w {col: col, op: op, val: val, logic: logic}
+    set r "where_clauses" w
+    r
+
+--- === Query Builder === ---
+
+export fn where q col op val
+    add_where q col op val "AND"
+
+export fn or_where q col op val
+    add_where q col op val "OR"
+
+export fn order_by q col dir
+    r: as_query q
+    if dir == nil
+        dir: "ASC"
+    orders: get r "order_bys"
+    if orders == nil
+        orders: []
+    push orders {col: col, dir: dir}
+    set r "order_bys" orders
+    r
+
+export fn limit q n
+    r: as_query q
+    set r "limit_val" n
+    r
+
+export fn offset q n
+    r: as_query q
+    set r "offset_val" n
+    r
+
+export fn group_by q col
+    r: as_query q
+    groups: get r "group_bys"
+    if groups == nil
+        groups: []
+    push groups col
+    set r "group_bys" groups
+    r
+
+export fn join q table_name on_clause jtype
+    r: as_query q
+    if jtype == nil
+        jtype: "INNER"
+    jtname: table_name
+    if type_of table_name == "MAP"
+        tn: get table_name "name"
+        if tn != nil
+            jtname: tn
+    joins: get r "joins"
+    if joins == nil
+        joins: []
+    push joins {type: jtype, table: jtname, on: on_clause}
+    set r "joins" joins
+    r
+
+export fn columns q cols
+    r: as_query q
+    set r "columns" cols
+    r
+
+export fn distinct q
+    r: as_query q
+    set r "distinct" true
+    r
+
+--- === CRUD === ---
+
+export fn insert h td data
+    dn: get td "name"
+    sql: build_insert dn data
+    db_exec h sql
+
+export fn select q h
+    r: as_query q
+    set r "table" (tname r)
+    sql: build_select r
+    db_query h sql
+
+export fn all q_or_td h
+    r: as_query q_or_td
+    set r "table" (tname r)
+    set r "columns" nil
+    set r "where_clauses" nil
+    set r "order_bys" nil
+    set r "limit_val" nil
+    set r "offset_val" nil
+    sql: build_select r
+    db_query h sql
+
+export fn first q_or_td h
+    r: as_query q_or_td
+    set r "table" (tname r)
+    set r "limit_val" 1
+    sql: build_select r
+    rows: db_query h sql
+    if (len rows) > 0
+        return (at rows 0)
+    nil
+
+export fn count q_or_td h
+    r: as_query q_or_td
+    set r "table" (tname r)
+    clist: ["COUNT(*) as cnt"]
+    set r "columns" clist
+    sql: build_select r
+    rows: db_query h sql
+    if (len rows) > 0
+        return (get (at rows 0) "cnt")
+    0
+
+export fn update q_or_td h data
+    r: as_query q_or_td
+    dn: tname r
+    wheres: get r "where_clauses"
+    sql: build_update dn data wheres
+    db_exec h sql
+
+export fn delete q_or_td h
+    r: as_query q_or_td
+    dn: tname r
+    wheres: get r "where_clauses"
+    sql: build_delete dn wheres
+    db_exec h sql
