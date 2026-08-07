@@ -1,175 +1,305 @@
 {
   "modules": {
-    "log-analyzer": {
-      "description": "AI-powered log file analysis, classification, and summarization",
-      "functions": ["log_analyze", "log_summarize"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
-    },
-    "sentiment": {
-      "description": "Sentiment analysis for texts (positive/neutral/negative)",
-      "functions": ["sentiment", "batch_sentiment", "sentiment_stats"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
-    },
-    "code-review": {
-      "description": "AI-powered code review with ratings and suggestions",
-      "functions": ["review", "rate"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe"
-    },
-    "translate-batch": {
-      "description": "Batch translation to any language via AI",
-      "functions": ["translate_batch", "translate"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe"
-    },
-    "incident-report": {
-      "description": "Security incident analysis, severity classification, and response planning",
-      "functions": ["incident_analyze", "incident_severity"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe"
-    },
     "changelog-gen": {
       "description": "AI-generated changelogs from git commits (bilingual support)",
-      "functions": ["changelog", "changelog_bilingual"],
+      "functions": [
+        "changelog",
+        "changelog_bilingual"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/changelog-gen/module.pipe",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/changelog-gen/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/changelog-gen/module.pipe"
+      }
     },
-    "email-classifier": {
-      "description": "Email classification (urgent/important/newsletter/spam/personal)",
-      "functions": ["classify_email", "email_batch", "email_urgent"],
+    "code-review": {
+      "description": "AI-powered code review with ratings and suggestions",
+      "functions": [
+        "review",
+        "rate"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe",
       "latest": "1.0.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/code-review/module.pipe"
+      }
     },
     "date-formatter": {
       "description": "Date/time utilities — formatting, relative time, weekend checks",
-      "functions": ["format_now", "relative_time", "is_weekend"],
+      "functions": [
+        "format_now",
+        "relative_time",
+        "is_weekend"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
+      }
+    },
+    "email-classifier": {
+      "description": "Email classification (urgent/important/newsletter/spam/personal)",
+      "functions": [
+        "classify_email",
+        "email_batch",
+        "email_urgent"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/email-classifier/module.pipe"
+      }
+    },
+    "incident-report": {
+      "description": "Security incident analysis, severity classification, and response planning",
+      "functions": [
+        "incident_analyze",
+        "incident_severity"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/incident-report/module.pipe"
+      }
+    },
+    "jpipe": {
+      "description": "JSON path query — navigate, pick, flatten JSON/Map structures with .path[0].key[*] syntax",
+      "functions": [
+        "jp",
+        "jpick",
+        "jkeys",
+        "jflatten"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
+      }
+    },
+    "log-analyzer": {
+      "description": "AI-powered log file analysis, classification, and summarization",
+      "functions": [
+        "log_analyze",
+        "log_summarize"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
+      }
     },
     "parallel-runner": {
-      "description": "Run multiple AI queries in parallel using the >> operator",
-      "functions": ["ask_many", "summarize_many", "translate_many"],
+      "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
+      "functions": [
+        "ask_many",
+        "summarize_many",
+        "translate_many"
+      ],
+      "url": "",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
       }
     },
+    "pipe-cli": {
+      "description": "CLI framework — subcommands, typed flags, auto-generated --help",
+      "functions": [
+        "app",
+        "command",
+        "flag",
+        "handler",
+        "run"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-cli/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-cli/module.pipe"
+      }
+    },
     "pipe-date": {
       "description": "DateTime utilities — parsing, formatting, arithmetic, relative time, weekend checks",
-      "functions": ["parse", "format", "add_days", "add_hours", "add_minutes", "diff_days", "diff_hours", "part", "now_iso", "is_before", "is_after", "is_between", "is_weekend", "is_weekday", "is_today", "relative"],
+      "functions": [
+        "parse",
+        "format",
+        "add_days",
+        "add_hours",
+        "add_minutes",
+        "diff_days",
+        "diff_hours",
+        "part",
+        "now_iso",
+        "is_before",
+        "is_after",
+        "is_between",
+        "is_weekend",
+        "is_weekday",
+        "is_today",
+        "relative"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe"
+      }
+    },
+    "pipe-http": {
+      "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
+      "functions": [
+        "hget",
+        "hpost",
+        "hput",
+        "hdelete",
+        "hget_json",
+        "hpost_json",
+        "req",
+        "auth_bearer",
+        "auth_basic",
+        "auth_apikey",
+        "is_ok",
+        "is_error"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe"
+      }
     },
     "pipe-orm": {
       "description": "ORM for Pipe+SQLite — schema definition, migrations, query builder, CRUD with pipeline API (19 exports)",
-      "functions": ["table", "col", "migrate", "insert", "select", "all", "first", "count", "update", "delete", "where", "or_where", "order_by", "limit", "offset", "join", "group_by", "distinct", "columns"],
+      "functions": [
+        "table",
+        "col",
+        "migrate",
+        "insert",
+        "select",
+        "all",
+        "first",
+        "count",
+        "update",
+        "delete",
+        "where",
+        "or_where",
+        "order_by",
+        "limit",
+        "offset",
+        "join",
+        "group_by",
+        "distinct",
+        "columns"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-orm/module.pipe",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-orm/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-orm/module.pipe"
-    },
-    "jpipe": {
-      "description": "JSON path query — navigate, pick, flatten JSON/Map structures with .path[0].key[*] syntax",
-      "functions": ["jp", "jpick", "jkeys", "jflatten"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
-    },
-    "pipe-tpl": {
-      "description": "Template engine — {{ var }}, {{ if }}, {{ for }}, filters, comments",
-      "functions": ["render", "render_file"],
-      "latest": "1.0.0",
-      "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe"
+      }
     },
     "pipe-test": {
-      "description": "Better assertions for Pipe test blocks — expect_eq, expect_truthy, expect_contains, expect_type, and more",
-      "functions": ["expect_eq", "expect_ne", "expect_truthy", "expect_falsy", "expect_nil", "expect_not_nil", "expect_gt", "expect_lt", "expect_gte", "expect_lte", "expect_contains", "expect_type", "expect_error", "expect_no_error", "with_hooks"],
+      "description": "Better assertions for Pipe test blocks — expect_eq, expect_truthy, expect_contains, and more",
+      "functions": [
+        "expect_eq",
+        "expect_ne",
+        "expect_truthy",
+        "expect_falsy",
+        "expect_nil",
+        "expect_not_nil",
+        "expect_gt",
+        "expect_lt",
+        "expect_gte",
+        "expect_lte",
+        "expect_contains",
+        "expect_type",
+        "expect_error",
+        "expect_no_error",
+        "with_hooks"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe",
       "latest": "1.1.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe",
         "1.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
+      }
     },
-    "rag-pipe": {
-      "description": "RAG pipeline — embed documents, search by meaning, ask AI with context from indexed knowledge",
-      "functions": ["index_create", "index_add", "index_search", "index_ask"],
+    "pipe-tpl": {
+      "description": "Template engine — {{ var }}, {{ if }}, {{ for }}, filters, comments",
+      "functions": [
+        "render",
+        "render_file"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe",
       "latest": "1.0.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-tpl/module.pipe"
+      }
     },
     "pipe-validate": {
       "description": "Schema validation for maps — type checking, required fields, ranges, regex, allowed values",
-      "functions": ["validate", "is_valid"],
+      "functions": [
+        "validate",
+        "is_valid"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe",
       "latest": "1.0.0",
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe"
+      }
     },
-    "pipe-cli": {
-      "description": "CLI framework — subcommands, typed flags, auto-generated --help",
-      "functions": ["app", "command", "flag", "handler", "run"],
+    "rag-pipe": {
+      "description": "RAG pipeline — embed documents, search by meaning, ask AI with context from indexed knowledge",
+      "functions": [
+        "index_create",
+        "index_add",
+        "index_search",
+        "index_ask"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe",
       "latest": "1.0.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-cli/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-cli/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
+      }
     },
-    "pipe-http": {
-      "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
-      "functions": ["hget", "hpost", "hput", "hdelete", "hget_json", "hpost_json", "req", "auth_bearer", "auth_basic", "auth_apikey", "is_ok", "is_error"],
+    "sentiment": {
+      "description": "Sentiment analysis for texts (positive/neutral/negative)",
+      "functions": [
+        "sentiment",
+        "batch_sentiment",
+        "sentiment_stats"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe",
       "latest": "1.0.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sentiment/module.pipe"
+      }
     },
     "sqlite": {
       "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL, DML, SELECT, JOINs, aggregates, transactions, binary persistence",
-      "functions": ["db_open", "db_close", "db_exec", "db_query", "q", "exec", "row_get", "row_eq", "row_ne"],
+      "functions": [
+        "db_open",
+        "db_close",
+        "db_exec",
+        "db_query",
+        "q",
+        "exec",
+        "row_get",
+        "row_eq",
+        "row_ne"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
       "latest": "0.8.0",
       "versions": {
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
-      },
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+      }
+    },
+    "translate-batch": {
+      "description": "Batch translation to any language via AI",
+      "functions": [
+        "translate_batch",
+        "translate"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/translate-batch/module.pipe"
+      }
     }
   }
 }

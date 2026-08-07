@@ -55,14 +55,20 @@ Every module needs a `pipe.json` manifest:
 
 ```
 my-module/
-├── module.pipe       ← Your code (required)
-└── README.md         ← What it does (optional but recommended)
+├── pipe.json          ← Module manifest (required)
+├── module.pipe        ← Your code (required)
+└── README.md          ← What it does (recommended)
 ```
 
 ## Registration
 
-After your PR is merged, maintainers update `registry.json` with your module name.
-You don't need to edit `registry.json` yourself — we handle that.
+`registry.json` is **auto-generated** from `pipe.json` files. When your PR is merged:
+
+1. A maintainer runs `pipe -gen-registry .` to update `registry.json`
+2. Your module appears in `pipe -search` immediately
+3. Users can install it with `pipe -get your-module`
+
+You don't need to edit `registry.json` yourself — it's generated from your pipe.json.
 
 ## Review Process
 
