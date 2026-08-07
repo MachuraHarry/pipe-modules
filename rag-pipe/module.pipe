@@ -1,0 +1,100 @@
+-- ============================================================
+-- rag-pipe — RAG (Retrieval-Augmented Generation) for Pipe
+-- Exports: index_create, index_add, index_search, index_ask
+-- Requires: pipe -get sqlite && pipe -get rag-pipe
+-- ============================================================
+
+import "sqlite.pipe"
+
+--- === Index Management === ---
+
+export fn index_create h name
+    try
+        db_exec h ("CREATE TABLE " ++ name ++ " (id INTEGER PRIMARY KEY, content TEXT, vector TEXT)")
+    catch e
+        print ""
+    {handle: h, table: name}
+
+export fn index_add idx text
+    h: get idx "handle"
+    tn: get idx "table"
+    if text == "" || text == nil
+        return 0
+    vec: embed text
+    vec_json: to_json vec
+    sql: "INSERT INTO " ++ tn ++ " (content, vector) VALUES ('" ++ (esc_sql text) ++ "', '" ++ vec_json ++ "')"
+    db_exec h sql
+    h
+
+--- === Search === ---
+
+export fn index_search idx query k
+    h: get idx "handle"
+    tn: get idx "table"
+    
+    if k == nil
+        k: 3
+    
+    -- Get all vectors
+    rows: db_query h ("SELECT id, content, vector FROM " ++ tn)
+    if (len rows) == 0
+        return []
+    
+    -- Extract vectors and texts
+    vectors: []
+    texts: []
+    ids: []
+    i: 0
+    while i < (len rows)
+        r: at rows i
+        push ids (get r "id")
+        push texts (get r "content")
+        vec_str: get r "vector"
+        vec: parse_json vec_str
+        push vectors vec
+        i: i + 1
+    
+    -- Embed query
+    qvec: embed query
+    
+    -- Find nearest
+    top_indices: nearest qvec vectors k
+    
+    -- Build results
+    results: []
+    i: 0
+    while i < (len top_indices)
+        idx_val: at top_indices i
+        result: {}
+        set result "id" (at ids idx_val)
+        set result "text" (at texts idx_val)
+        set result "score" (cosine_sim qvec (at vectors idx_val))
+        push results result
+        i: i + 1
+    
+    results
+
+--- === Ask (Search + AI) === ---
+
+export fn index_ask idx question
+    results: index_search idx question 3
+    
+    if (len results) == 0
+        return ask question
+    
+    -- Build context from search results
+    context: ""
+    i: 0
+    while i < (len results)
+        r: at results i
+        context: context ++ (get r "text")
+        context: context ++ "\n---\n"
+        i: i + 1
+    
+    prompt: "Context:\n" ++ context ++ "\nQuestion: " ++ question ++ "\nAnswer based on the context above."
+    ask prompt
+
+--- === Helpers === ---
+
+fn esc_sql s
+    replace_all s "'" "''"

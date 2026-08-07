@@ -126,6 +126,15 @@
       },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
     },
+    "rag-pipe": {
+      "description": "RAG pipeline — embed documents, search by meaning, ask AI with context from indexed knowledge",
+      "functions": ["index_create", "index_add", "index_search", "index_ask"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
+    },
     "pipe-validate": {
       "description": "Schema validation for maps — type checking, required fields, ranges, regex, allowed values",
       "functions": ["validate", "is_valid"],
