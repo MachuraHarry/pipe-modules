@@ -126,6 +126,15 @@
       },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
     },
+    "pipe-validate": {
+      "description": "Schema validation for maps — type checking, required fields, ranges, regex, allowed values",
+      "functions": ["validate", "is_valid"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe"
+    },
     "pipe-cli": {
       "description": "CLI framework — subcommands, typed flags, auto-generated --help",
       "functions": ["app", "command", "flag", "handler", "run"],

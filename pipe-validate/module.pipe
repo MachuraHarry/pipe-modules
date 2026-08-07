@@ -1,0 +1,136 @@
+-- ============================================================
+-- pipe-validate — Schema validation for Pipe maps
+-- Exports: validate, is_valid
+-- ============================================================
+
+--- === Type Checking === ---
+
+fn check_type val expected_type
+    if expected_type == "any"
+        return true
+    if val == nil
+        return false
+    actual: type_of val
+    if expected_type == "number"
+        return actual == "INTEGER" || actual == "FLOAT"
+    if actual == "INTEGER" && expected_type == "integer"
+        return true
+    upper actual == upper expected_type
+
+fn type_name_for expected_type
+    if expected_type == "number"
+        return "number"
+    if expected_type == "integer"
+        return "integer"
+    upper expected_type
+
+--- === Field Validation === ---
+
+fn validate_field val field_def
+    name: get field_def "field"
+    ftype: get field_def "type"
+    required: get field_def "required"
+    min_val: get field_def "min"
+    max_val: get field_def "max"
+    min_len_val: get field_def "min_len"
+    max_len_val: get field_def "max_len"
+    regex_val: get field_def "regex"
+    values_list: get field_def "values"
+
+    -- Nil check
+    if val == nil
+        if required
+            s: "field '" ++ name ++ "' is required"
+            fail s
+        return ""
+
+    -- Type check
+    if ftype != nil
+        if !(check_type val ftype)
+            s: "field '" ++ name ++ "' must be "
+            s: s ++ (type_name_for ftype)
+            s: s ++ ", got "
+            s: s ++ (type_of val)
+            fail s
+
+    -- Numeric min/max
+    if min_val != nil
+        if val < min_val
+            s: "field '" ++ name ++ "' must be >= "
+            s: s ++ (to_str min_val)
+            fail s
+    if max_val != nil
+        if val > max_val
+            s: "field '" ++ name ++ "' must be <= "
+            s: s ++ (to_str max_val)
+            fail s
+
+    -- String/list length
+    if min_len_val != nil
+        if (len val) < min_len_val
+            s: "field '" ++ name ++ "' length must be >= "
+            s: s ++ (to_str min_len_val)
+            fail s
+    if max_len_val != nil
+        if (len val) > max_len_val
+            s: "field '" ++ name ++ "' length must be <= "
+            s: s ++ (to_str max_len_val)
+            fail s
+
+    -- Regex
+    if regex_val != nil
+        if type_of val == "STRING"
+            if !(regex_match regex_val val)
+                s: "field '" ++ name ++ "' must match pattern /" ++ regex_val ++ "/"
+                fail s
+
+    -- Allowed values
+    if values_list != nil
+        found: false
+        vi: 0
+        while vi < (len values_list)
+            if val == (at values_list vi)
+                found: true
+                break
+            vi: vi + 1
+        if !found
+            s: "field '" ++ name ++ "' has invalid value"
+            fail s
+
+    ""
+
+--- === Validate All === ---
+
+fn validate_all data schema
+    errors: []
+    si: 0
+    while si < (len schema)
+        fd: at schema si
+        name: get fd "field"
+        val: get data name
+        err: validate_field val fd
+        if err != ""
+            push errors err
+        si: si + 1
+    {ok: (len errors) == 0, errors: errors}
+
+--- === Public API === ---
+
+fn fail msg
+    raise msg
+
+export fn validate data schema
+    si: 0
+    while si < (len schema)
+        fd: at schema si
+        name: get fd "field"
+        val: get data name
+        err_msg: validate_field val fd
+        if err_msg != ""
+            fail err_msg
+        si: si + 1
+    data
+
+export fn is_valid data schema
+    result: validate_all data schema
+    get result "ok"
