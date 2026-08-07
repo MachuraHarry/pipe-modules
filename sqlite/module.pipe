@@ -1,6 +1,6 @@
 -- ============================================================
 -- sqlite - Pure-Pipe relational database module
--- Exports: db_open, db_close, db_exec, db_query, q, exec, row_get, row_eq, row_ne
+-- Exports: db_open, db_close, db_exec, db_query
 -- ============================================================
 
 -- Internal: pair list for multi-return values
@@ -20,11 +20,11 @@ DB_VERSION: 1
 
 -- Database registry (handle → db, stored as list by index)
 registry: []
-next_handle: 0
+next_handle: [0]
 
 fn alloc_handle
-  h: next_handle
-  next_handle: next_handle + 1
+  h: at next_handle 0
+  set next_handle 0 (h + 1)
   push registry (nil)
   h
 
@@ -2008,12 +2008,12 @@ fn exec_select db node
     i: i + 1
 
   -- GROUP BY
+  all_aliases: base_aliases
   grouped: false
   groups: {}
   group_keys: []
   if group_by != nil && (len group_by) > 0
     grouped: true
-    all_aliases: base_aliases
     i: 0
     while i < (len filtered)
       row: at filtered i
@@ -2217,7 +2217,6 @@ fn exec_select db node
       push output out_row
     else
       -- No aggregates: produce one row per input
-      all_aliases: base_aliases
       i: 0
       while i < (len filtered)
         row: at filtered i
@@ -2363,8 +2362,8 @@ fn exec_rollback db
 --- === SECTION: Exported API === ---
 
 export fn db_open path
-  h: next_handle
-  next_handle: next_handle + 1
+  h: at next_handle 0
+  set next_handle 0 (h + 1)
   push registry (nil)
   db: nil
   if path == ":memory:"
