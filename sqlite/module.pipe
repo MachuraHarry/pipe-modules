@@ -1257,6 +1257,9 @@ fn parse_create ps
         if parse_match_kw ps "autoincrement"
           parse_advance ps
           autoi: true
+        -- INTEGER PRIMARY KEY auto-increments in standard SQLite
+        if ctype == "integer"
+          autoi: true
       -- Skip other constraints (DEFAULT, NOT NULL, UNIQUE, CHECK, etc.)
       while (parse_cur_type ps) == "kw" && (parse_cur_text ps) != "primary"
         if (parse_cur_text ps) == "default"
