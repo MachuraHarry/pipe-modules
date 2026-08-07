@@ -89,6 +89,15 @@
       },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
     },
+    "pipe-test": {
+      "description": "Better assertions for Pipe test blocks — expect_eq, expect_truthy, expect_contains, expect_type, and more",
+      "functions": ["expect_eq", "expect_ne", "expect_truthy", "expect_falsy", "expect_nil", "expect_not_nil", "expect_gt", "expect_lt", "expect_gte", "expect_lte", "expect_contains", "expect_type"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
+    },
     "pipe-http": {
       "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
       "functions": ["hget", "hpost", "hput", "hdelete", "hget_json", "hpost_json", "req", "auth_bearer", "auth_basic", "auth_apikey", "is_ok", "is_error"],

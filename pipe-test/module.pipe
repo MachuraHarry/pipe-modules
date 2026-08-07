@@ -1,0 +1,133 @@
+-- ============================================================
+-- pipe-test - Better assertions and test utilities for Pipe
+-- Exports: expect_eq, expect_ne, expect_truthy, expect_falsy,
+--          expect_nil, expect_not_nil, expect_contains, expect_type,
+--          expect_gt, expect_lt, expect_gte, expect_lte
+-- ============================================================
+
+--- === Internal helpers === ---
+
+fn fail msg
+    raise msg
+
+fn str_val v
+    if type_of v == "STRING"
+        s: "\""
+        s: s ++ v
+        s: s ++ "\""
+        return s
+    to_str v
+
+--- === Equality === ---
+
+export fn expect_eq actual expected msg
+    if actual != expected
+        s: "expected " ++ (str_val expected)
+        s: s ++ " but got " ++ (str_val actual)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_ne actual expected msg
+    if actual == expected
+        s: "expected NOT " ++ (str_val expected) ++ " but got it"
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+--- === Truthiness === ---
+
+export fn expect_truthy val msg
+    if !val
+        s: "expected truthy but got " ++ (str_val val)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_falsy val msg
+    if val
+        s: "expected falsy but got " ++ (str_val val)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+--- === Nil checks === ---
+
+export fn expect_nil val msg
+    if val != nil
+        s: "expected nil but got " ++ (str_val val)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_not_nil val msg
+    if val == nil
+        s: "expected non-nil value"
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+--- === Numeric comparisons === ---
+
+export fn expect_gt actual expected msg
+    if !(actual > expected)
+        s: "expected " ++ (str_val actual)
+        s: s ++ " > " ++ (str_val expected)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_lt actual expected msg
+    if !(actual < expected)
+        s: "expected " ++ (str_val actual)
+        s: s ++ " < " ++ (str_val expected)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_gte actual expected msg
+    if !(actual >= expected)
+        s: "expected " ++ (str_val actual)
+        s: s ++ " >= " ++ (str_val expected)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+export fn expect_lte actual expected msg
+    if !(actual <= expected)
+        s: "expected " ++ (str_val actual)
+        s: s ++ " <= " ++ (str_val expected)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+--- === Containment === ---
+
+export fn expect_contains container item msg
+    ok: false
+    if type_of container == "LIST"
+        i: 0
+        while i < (len container)
+            if (at container i) == item
+                ok: true
+                break
+            i: i + 1
+    else if type_of container == "STRING"
+        ok: contains container item
+    if !ok
+        s: "expected container to contain " ++ (str_val item)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
+
+--- === Type checks === ---
+
+export fn expect_type val expected_type msg
+    actual: type_of val
+    if actual != expected_type
+        s: "expected type " ++ expected_type
+        s: s ++ " but got " ++ actual
+        s: s ++ " for value " ++ (str_val val)
+        if msg != ""
+            s: s ++ " — " ++ msg
+        fail s
