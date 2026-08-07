@@ -65,7 +65,7 @@ fn tokenize tpl
                     rest: slice content 3 (len content)
                     rest: trim rest
                     -- Parse "var in expr"
-                    in_pos: index_of rest " in "
+                    in_pos: str_index rest " in "
                     if in_pos > 0
                         var_name: slice rest 0 in_pos
                         var_name: trim var_name
@@ -90,6 +90,18 @@ fn tokenize tpl
     tokens
 
 --- === Helpers === ---
+
+fn str_index str needle
+    n: len str
+    m: len needle
+    if m == 0
+        return 0
+    i: 0
+    while i <= n - m
+        if slice str i (i + m) == needle
+            return i
+        i: i + 1
+    -1
 
 fn copy_map src
     dst: {}
@@ -190,11 +202,10 @@ fn find_else tokens start_idx
 
 --- === Evaluator === ---
 
-fn eval_tokens tokens start_idx data stop_at_end
+fn eval_tokens tokens start_idx end_idx data
     out: ""
     idx: start_idx
-    tn: len tokens
-    while idx < tn
+    while idx < end_idx
         t: at tokens idx
         tp: get t "t"
 
@@ -208,24 +219,22 @@ fn eval_tokens tokens start_idx data stop_at_end
         else if tp == "if"
             cond: eval_expr (get t "v") data
             else_idx: find_else tokens idx
-            end_idx: find_matching_end tokens idx
+            block_end: find_matching_end tokens idx
 
             if cond
-                -- Render if body
-                body_end: end_idx
+                body_end: block_end
                 if else_idx > 0
                     body_end: else_idx
-                out: out ++ (eval_tokens tokens (idx + 1) data false)
+                out: out ++ (eval_tokens tokens (idx + 1) body_end data)
             else if else_idx > 0
-                -- Render else body
-                out: out ++ (eval_tokens tokens (else_idx + 1) data false)
+                out: out ++ (eval_tokens tokens (else_idx + 1) block_end data)
 
-            idx: end_idx
+            idx: block_end
 
         else if tp == "for"
             varname: get t "var"
             items: eval_expr (get t "v") data
-            end_idx: find_matching_end tokens idx
+            for_end: find_matching_end tokens idx
 
             if type_of items == "LIST"
                 fi: 0
@@ -233,14 +242,10 @@ fn eval_tokens tokens start_idx data stop_at_end
                     item: at items fi
                     iter_data: copy_map data
                     set iter_data varname item
-                    out: out ++ (eval_tokens tokens (idx + 1) iter_data false)
+                    out: out ++ (eval_tokens tokens (idx + 1) for_end iter_data)
                     fi: fi + 1
 
-            idx: end_idx
-
-        else if tp == "end"
-            if stop_at_end
-                break
+            idx: for_end
         idx: idx + 1
     out
 
@@ -248,7 +253,7 @@ fn eval_tokens tokens start_idx data stop_at_end
 
 export fn render tpl data
     tokens: tokenize tpl
-    eval_tokens tokens 0 data false
+    eval_tokens tokens 0 (len tokens) data
 
 export fn render_file path data
     tpl: read_file path
