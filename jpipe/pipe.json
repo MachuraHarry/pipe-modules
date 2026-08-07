@@ -1,0 +1,6 @@
+{
+  "name": "jpipe",
+  "version": "1.0.0",
+  "description": "JSON path query — navigate, pick, flatten JSON/Map structures with .path[0].key[*] syntax",
+  "exports": ["jp", "jpick", "jkeys", "jflatten"]
+}

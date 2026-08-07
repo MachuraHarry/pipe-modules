@@ -1,0 +1,6 @@
+{
+  "name": "pipe-tpl",
+  "version": "1.0.0",
+  "description": "Template engine — {{ var }}, {{ if }}, {{ for }}, filters, comments",
+  "exports": ["render", "render_file"]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "pipe-http",
+  "version": "1.0.0",
+  "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
+  "exports": ["hget", "hpost", "hput", "hdelete", "hget_json", "hpost_json", "req", "auth_bearer", "auth_basic", "auth_apikey", "is_ok", "is_error"]
+}

@@ -13,24 +13,43 @@ Anyone can contribute a module. Here's how.
 ## Quick Start (5 minutes)
 
 1. Fork this repo
-2. Create a folder: `mkdir my-module`
-3. Write a `module.pipe` file:
+2. Scaffold a module: `pipe -init my-module`
+3. Edit `my-module/pipe.json` — update description, add exports
+4. Edit `my-module/module.pipe` — write your code
+5. Validate: `pipe -validate my-module`
+6. Open a Pull Request
 
-```pipe
-export fn my_function input
-    ask ("Process this: " ++ input)
+### pipe.json Format
+
+Every module needs a `pipe.json` manifest:
+
+```json
+{
+  "name": "my-module",
+  "version": "0.1.0",
+  "description": "What it does",
+  "author": "your-name",
+  "license": "MIT",
+  "exports": ["my_function", "another_fn"],
+  "dependencies": {
+    "pipe-http": "^1.0.0"
+  }
+}
 ```
 
-4. Create a `README.md` explaining what it does
-5. Open a Pull Request
+- **name** (required): lowercase letters, digits, hyphens, underscores
+- **version** (required): semver-compatible version string
+- **exports** (optional): list of function names. Helps with discovery and LSP.
+- **dependencies** (optional): other modules your module needs
 
-## Module Rules
+### Example Module
 
 - **One folder per module.** Name it after the module (e.g., `log-analyzer/`)
 - **Export your functions.** Use `export fn` so they're visible on import
 - **Keep it focused.** One module = one job. Don't make mega-modules.
 - **No API keys in code.** Use environment variables (users set their own).
-- **Test before submitting.** Run `pipe -ast module.pipe` to check syntax.
+- **Test before submitting.** Run `pipe -validate .` to check syntax and manifest.
+- **Include a pipe.json.** All modules must have a valid pipe.json manifest.
 
 ## Example Module
 

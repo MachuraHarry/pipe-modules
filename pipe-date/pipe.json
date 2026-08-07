@@ -1,0 +1,6 @@
+{
+  "name": "pipe-date",
+  "version": "1.0.0",
+  "description": "DateTime utilities — parsing, formatting, arithmetic, relative time, weekend checks",
+  "exports": ["parse", "format", "add_days", "add_hours", "add_minutes", "diff_days", "diff_hours", "part", "now_iso", "is_before", "is_after", "is_between", "is_weekend", "is_weekday", "is_today", "relative"]
+}
