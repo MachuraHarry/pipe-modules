@@ -243,18 +243,53 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-validate/module.pipe"
       }
     },
+    "pipe-web": {
+      "description": "Web framework for Pipe — routing, middleware, JSON/text/HTML responses (ASP.NET / Express style)",
+      "functions": [
+        "app",
+        "route_get",
+        "post",
+        "put",
+        "delete",
+        "patch",
+        "any",
+        "use",
+        "listen",
+        "serve",
+        "close",
+        "json",
+        "ok",
+        "text",
+        "html",
+        "redirect",
+        "not_found",
+        "internal",
+        "json_body"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-web/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-web/module.pipe"
+      }
+    },
     "rag-pipe": {
       "description": "RAG pipeline — embed documents, search by meaning, ask AI with context from indexed knowledge",
       "functions": [
         "index_create",
         "index_add",
+        "index_add_doc",
+        "index_list",
+        "index_get",
+        "index_delete",
+        "index_count",
         "index_search",
         "index_ask"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe",
-      "latest": "1.0.0",
+      "latest": "1.1.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe",
+        "1.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/rag-pipe/module.pipe"
       }
     },
     "sentiment": {
