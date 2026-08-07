@@ -90,7 +90,7 @@
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-date/module.pipe"
     },
     "pipe-orm": {
-      "description": "ORM for Pipe+SQLite — schema definition, migrations, query builder, CRUD with pipeline API",
+      "description": "ORM for Pipe+SQLite — schema definition, migrations, query builder, CRUD with pipeline API (19 exports)",
       "functions": ["table", "col", "migrate", "insert", "select", "all", "first", "count", "update", "delete", "where", "or_where", "order_by", "limit", "offset", "join", "group_by", "distinct", "columns"],
       "latest": "1.0.0",
       "versions": {
