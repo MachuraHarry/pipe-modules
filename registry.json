@@ -91,10 +91,11 @@
     },
     "pipe-test": {
       "description": "Better assertions for Pipe test blocks — expect_eq, expect_truthy, expect_contains, expect_type, and more",
-      "functions": ["expect_eq", "expect_ne", "expect_truthy", "expect_falsy", "expect_nil", "expect_not_nil", "expect_gt", "expect_lt", "expect_gte", "expect_lte", "expect_contains", "expect_type"],
-      "latest": "1.0.0",
+      "functions": ["expect_eq", "expect_ne", "expect_truthy", "expect_falsy", "expect_nil", "expect_not_nil", "expect_gt", "expect_lt", "expect_gte", "expect_lte", "expect_contains", "expect_type", "expect_error", "expect_no_error", "with_hooks"],
+      "latest": "1.1.0",
       "versions": {
-        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe",
+        "1.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
       },
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
     },

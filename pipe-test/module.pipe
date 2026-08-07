@@ -2,7 +2,8 @@
 -- pipe-test - Better assertions and test utilities for Pipe
 -- Exports: expect_eq, expect_ne, expect_truthy, expect_falsy,
 --          expect_nil, expect_not_nil, expect_contains, expect_type,
---          expect_gt, expect_lt, expect_gte, expect_lte
+--          expect_gt, expect_lt, expect_gte, expect_lte,
+--          expect_error, expect_no_error, with_hooks
 -- ============================================================
 
 --- === Internal helpers === ---
@@ -131,3 +132,31 @@ export fn expect_type val expected_type msg
         if msg != ""
             s: s ++ " — " ++ msg
         fail s
+
+--- === Error catching === ---
+
+export fn expect_error fn_to_test
+    caught: ""
+    try
+        fn_to_test 0
+    catch e
+        caught: e
+    if caught == ""
+        fail "expected an error but none was raised"
+    caught
+
+export fn expect_no_error fn_to_test
+    caught: ""
+    try
+        fn_to_test 0
+    catch e
+        caught: e
+    if caught != ""
+        fail ("unexpected error: " ++ caught)
+
+--- === Hooks === ---
+
+export fn with_hooks before_fn test_fn after_fn
+    before_fn 0
+    test_fn 0
+    after_fn 0

@@ -1,11 +1,11 @@
 # pipe-test
 
-Better assertions for Pipe's built-in `test` blocks. Drop-in enhancement — works with `pipe -test`.
+Better assertions and test hooks for Pipe's built-in `test` blocks. Works with `pipe -test`.
 
 ## Functions
 
 **Equality:**
-- `expect_eq(actual, expected, msg?)` — assert equality with custom message
+- `expect_eq(actual, expected, msg?)` — assert equality
 - `expect_ne(actual, expected, msg?)` — assert inequality
 
 **Truthiness:**
@@ -17,32 +17,46 @@ Better assertions for Pipe's built-in `test` blocks. Drop-in enhancement — wor
 - `expect_not_nil(val, msg?)` — assert value is not nil
 
 **Numeric comparisons:**
-- `expect_gt(actual, expected, msg?)` — assert actual > expected
-- `expect_lt(actual, expected, msg?)` — assert actual < expected
-- `expect_gte(actual, expected, msg?)` — assert actual >= expected
-- `expect_lte(actual, expected, msg?)` — assert actual <= expected
+- `expect_gt(a, b, msg?)` / `expect_lt` / `expect_gte` / `expect_lte`
 
 **Containment:**
-- `expect_contains(container, item, msg?)` — assert list/string contains item
+- `expect_contains(container, item, msg?)` — list or string contains
 
 **Type checks:**
-- `expect_type(val, type_name, msg?)` — assert type_of(val) == type_name
+- `expect_type(val, type_name, msg?)` — assert type_of
+
+**Error catching (requires Pipe v0.8+ with fixed try/catch):**
+- `expect_error(fn)` — calls fn, returns caught error message. Fails if no error.
+- `expect_no_error(fn)` — calls fn, fails if an error occurs.
+
+**Hooks:**
+- `with_hooks(before_fn, test_fn, after_fn)` — run before → test → after sequence
+
+> Note: hook and test functions must accept one dummy argument (`fn my_fn _`).
 
 ## Usage
 
 ```pipe
-import "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-test/module.pipe"
+import "pipe-test"
 
-test "basic assertions"
-    expect_eq (2 + 2) 4 "math works"
-    expect_truthy (len [1, 2, 3]) "non-empty list"
-    expect_contains ["a", "b", "c"] "b" "found b"
-    expect_type 42 "INTEGER" "type check"
+-- Error testing
+fn bad_db _
+    raise "connection refused"
 
-test "custom failure message"
-    -- If this fails, prints:
-    -- FAIL ... (expected 5 but got 4 — wrong answer)
-    expect_eq (2 + 2) 4 "wrong answer"
+test "error handling"
+    err: expect_error bad_db
+    expect_contains err "connection" "right error"
+
+-- Hooks
+test "setup and teardown"
+    state: [0]
+    fn setup _
+        set state 0 99
+    fn check _
+        expect_eq (at state 0) 99 "setup ran"
+    fn teardown _
+        set state 0 0
+    with_hooks setup check teardown
 ```
 
 Run with: `pipe -test`
