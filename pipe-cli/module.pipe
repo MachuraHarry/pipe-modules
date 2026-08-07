@@ -1,0 +1,182 @@
+-- ============================================================
+-- pipe-cli - CLI framework for Pipe
+-- Exports: app, command, flag, handler, run
+-- ============================================================
+
+--- === App === ---
+
+export fn app name desc
+    {name: name, desc: desc, commands: []}
+
+--- === Commands === ---
+
+export fn command app name desc
+    cmd: {name: name, desc: desc, flags: [], handler: nil}
+    push (get app "commands") cmd
+    cmd
+
+--- === Flags === ---
+
+export fn flag cmd name short desc default
+    push (get cmd "flags") {name: name, short: short, desc: desc, default: default}
+
+--- === Handler === ---
+
+export fn handler cmd fn_to_run
+    set cmd "handler" fn_to_run
+
+--- === Help === ---
+
+fn show_help app
+    s: (get app "name")
+    s: s ++ " — "
+    s: s ++ (get app "desc")
+    print s
+    print ""
+    print "Usage: pipe <file> <command> [options]"
+    print ""
+
+    cmds: get app "commands"
+    if (len cmds) > 0
+        print "Commands:"
+        i: 0
+        while i < (len cmds)
+            c: at cmds i
+            s2: "  "
+            s2: s2 ++ (get c "name")
+            s2: s2 ++ "    "
+            s2: s2 ++ (get c "desc")
+            print s2
+            i: i + 1
+        print ""
+
+fn show_cmd_help cmd
+    s: "Options for "
+    s: s ++ (get cmd "name")
+    s: s ++ ":"
+    print s
+    print ""
+
+    flags: get cmd "flags"
+    if (len flags) > 0
+        i: 0
+        while i < (len flags)
+            f: at flags i
+            fname: get f "name"
+            fshort: get f "short"
+            fdesc: get f "desc"
+            fdef: get f "default"
+
+            s2: "  --"
+            s2: s2 ++ fname
+            if fshort != ""
+                s2: s2 ++ ", -"
+                s2: s2 ++ fshort
+            s2: s2 ++ "    "
+            s2: s2 ++ fdesc
+            if fdef != nil
+                s2: s2 ++ " (default: "
+                s2: s2 ++ (to_str fdef)
+                s2: s2 ++ ")"
+            print s2
+            i: i + 1
+
+--- === Flag Parser === ---
+
+fn parse_flags flag_defs argv start_idx
+    vals: {}
+    -- Set defaults
+    i: 0
+    while i < (len flag_defs)
+        f: at flag_defs i
+        def: get f "default"
+        if def != nil
+            set vals (get f "name") def
+        i: i + 1
+
+    -- Parse argv
+    idx: start_idx
+    nargs: len argv
+    while idx < nargs
+        arg: at argv idx
+        if arg == "--help" || arg == "-h"
+            set vals "_help" true
+            idx: idx + 1
+            continue
+
+        matched: false
+        j: 0
+        while j < (len flag_defs)
+            f: at flag_defs j
+            fname: get f "name"
+            fshort: get f "short"
+
+            long_flag: "--" ++ fname
+            short_flag: "-" ++ fshort
+
+            if arg == long_flag || (fshort != "" && arg == short_flag)
+                matched: true
+                def: get f "default"
+                if def == nil || type_of def == "BOOLEAN"
+                    set vals fname true
+                else
+                    idx: idx + 1
+                    if idx < nargs
+                        val: at argv idx
+                        if type_of def == "INTEGER"
+                            set vals fname (to_num val)
+                        else
+                            set vals fname val
+                break
+            j: j + 1
+
+        if !matched
+            s: "unknown option: "
+            s: s ++ arg
+            print s
+        idx: idx + 1
+    vals
+
+--- === Runner === ---
+
+export fn run app args
+    if (len args) < 2
+        show_help app
+        return {}
+
+    cmd_name: at args 1
+
+    -- Find command
+    cmds: get app "commands"
+    found: nil
+    i: 0
+    while i < (len cmds)
+        c: at cmds i
+        if (get c "name") == cmd_name
+            found: c
+            break
+        i: i + 1
+
+    if found == nil
+        s: "unknown command: "
+        s: s ++ cmd_name
+        print s
+        show_help app
+        return {}
+
+    -- Parse flags
+    opts: parse_flags (get found "flags") args 2
+
+    if get opts "_help"
+        show_cmd_help found
+        return {}
+
+    -- Run handler
+    hfn: get found "handler"
+    if hfn == nil
+        s: "no handler for command: "
+        s: s ++ cmd_name
+        print s
+        return {}
+
+    hfn opts
