@@ -67,6 +67,27 @@ my-module/
 1. A maintainer runs `pipe -gen-registry .` to update `registry.json`
 2. Your module appears in `pipe -search` immediately
 3. Users can install it with `pipe -get your-module`
+4. Or they add it to their `pipe.json` dependencies and run `pipe -install`
+
+### Adding Dependencies
+
+If your module depends on others, list them in `pipe.json`:
+
+```json
+{
+  "name": "my-module",
+  "version": "0.1.0",
+  "dependencies": {
+    "pipe-http": "^1.0.0",
+    "sqlite": "^0.8.0"
+  }
+}
+```
+
+Users install all dependencies recursively with:
+```
+pipe -install
+```
 
 You don't need to edit `registry.json` yourself — it's generated from your pipe.json.
 
