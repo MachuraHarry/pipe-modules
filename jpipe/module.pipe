@@ -1,0 +1,242 @@
+-- ============================================================
+-- jpipe - JSON path query module for Pipe
+-- Exports: jp, jpick, jkeys, jflatten
+-- ============================================================
+
+--- === Path Lexer === ---
+
+fn isdigit c
+    ch: at c 0
+    "0" <= ch && ch <= "9"
+
+fn lex_path path
+    tokens: []
+    pl: len path
+    i: 0
+    while i < pl
+        c: at path i
+        if c == "."
+            push tokens {t: "dot"}
+            i: i + 1
+        else if c == "["
+            push tokens {t: "lbrack"}
+            i: i + 1
+        else if c == "]"
+            push tokens {t: "rbrack"}
+            i: i + 1
+        else if c == "*"
+            push tokens {t: "star"}
+            i: i + 1
+        else
+            start: i
+            while i < pl
+                ch: at path i
+                if ch == "." || ch == "[" || ch == "]"
+                    break
+                i: i + 1
+            word: slice path start i
+            push tokens {t: "word", v: word}
+    tokens
+
+--- === AST Definition === ---
+-- Segment types: "key", "index", "wildcard"
+
+--- === Helper: determine if segment value is numeric index or string key === ---
+
+fn is_number s
+    if (len s) == 0
+        return false
+    j: 0
+    while j < (len s)
+        ch: at s j
+        if !(isdigit ch)
+            return false
+        j: j + 1
+    true
+
+--- === Path Parser: tokens -> segments === ---
+
+fn parse_path tokens
+    segs: []
+    tn: len tokens
+    i: 0
+    while i < tn
+        t0: at tokens i
+        tp: get t0 "t"
+        if tp == "dot"
+            i: i + 1
+            if i < tn
+                t1: at tokens i
+                if (get t1 "t") == "word"
+                    push segs {type: "key", key: (get t1 "v")}
+                    i: i + 1
+        else if tp == "lbrack"
+            i: i + 1
+            if i < tn
+                t2: at tokens i
+                t2t: get t2 "t"
+                if t2t == "star"
+                    push segs {type: "wildcard"}
+                    i: i + 1
+                else if t2t == "word"
+                    val: get t2 "v"
+                    if is_number val
+                        push segs {type: "index", index: (to_num val)}
+                    else
+                        push segs {type: "key", key: val}
+                    i: i + 1
+            -- skip closing bracket
+            if i < tn
+                t3: at tokens i
+                if (get t3 "t") == "rbrack"
+                    i: i + 1
+    segs
+
+--- === Path Evaluator === ---
+
+fn eval_segments obj segs
+    cur: obj
+    si: 0
+    sn: len segs
+    while si < sn
+        seg: at segs si
+        st: get seg "type"
+        if st == "key"
+            key: get seg "key"
+            if cur == nil
+                return nil
+            cur: get cur key
+        else if st == "index"
+            idx: get seg "index"
+            if cur == nil
+                return nil
+            if type_of cur == "LIST"
+                cur: at cur idx
+            else
+                return nil
+        else if st == "wildcard"
+            if cur == nil
+                return nil
+            if type_of cur == "LIST"
+                -- Process remaining segments for each element
+                rest: []
+                rj: si + 1
+                while rj < sn
+                    push rest (at segs rj)
+                    rj: rj + 1
+                results: []
+                ci: 0
+                while ci < (len cur)
+                    item: at cur ci
+                    if (len rest) == 0
+                        push results item
+                    else
+                        v: eval_segments item rest
+                        if v != nil
+                            push results v
+                    ci: ci + 1
+                return results
+            else
+                return nil
+        si: si + 1
+    cur
+
+--- === Core API === ---
+
+export fn jp obj path
+    tokens: lex_path path
+    segs: parse_path tokens
+    if (len segs) == 0
+        return obj
+    eval_segments obj segs
+
+--- === Convenience Functions === ---
+
+export fn jpick obj keys
+    if type_of keys != "LIST"
+        return {}
+    out: {}
+    i: 0
+    while i < (len keys)
+        k: at keys i
+        v: get obj k
+        if v != nil
+            set out k v
+        i: i + 1
+    out
+
+export fn jkeys obj
+    results: []
+    _walk_keys obj "" results
+    results
+
+fn _walk_keys obj prefix results
+    if obj == nil
+        return nil
+    tp: type_of obj
+    if tp == "MAP"
+        ks: keys obj
+        i: 0
+        while i < (len ks)
+            k: at ks i
+            new_pref: k
+            if prefix != ""
+                new_pref: prefix ++ "." ++ k
+            child: get obj k
+            ct: type_of child
+            if ct == "MAP" || ct == "LIST"
+                _walk_keys child new_pref results
+            else
+                push results new_pref
+            i: i + 1
+    else if tp == "LIST"
+        i: 0
+        while i < (len obj)
+            child: at obj i
+            new_pref: prefix ++ "[" ++ (to_str i) ++ "]"
+            ct: type_of child
+            if ct == "MAP" || ct == "LIST"
+                _walk_keys child new_pref results
+            else
+                push results new_pref
+            i: i + 1
+    else
+        push results prefix
+
+export fn jflatten obj
+    out: {}
+    _walk_flat obj "" out
+    out
+
+fn _walk_flat obj prefix out
+    if obj == nil
+        return nil
+    tp: type_of obj
+    if tp == "MAP"
+        ks: keys obj
+        i: 0
+        while i < (len ks)
+            k: at ks i
+            new_pref: k
+            if prefix != ""
+                new_pref: prefix ++ "." ++ k
+            child: get obj k
+            ct: type_of child
+            if ct == "MAP" || ct == "LIST"
+                _walk_flat child new_pref out
+            else
+                set out new_pref child
+            i: i + 1
+    else if tp == "LIST"
+        i: 0
+        while i < (len obj)
+            child: at obj i
+            new_pref: prefix ++ "[" ++ (to_str i) ++ "]"
+            ct: type_of child
+            if ct == "MAP" || ct == "LIST"
+                _walk_flat child new_pref out
+            else
+                set out new_pref child
+            i: i + 1
+    else
+        set out prefix obj

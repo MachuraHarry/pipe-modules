@@ -80,6 +80,15 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
       }
     },
+    "jpipe": {
+      "description": "JSON path query — navigate, pick, flatten JSON/Map structures with .path[0].key[*] syntax",
+      "functions": ["jp", "jpick", "jkeys", "jflatten"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/jpipe/module.pipe"
+    },
     "pipe-http": {
       "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
       "functions": ["hget", "hpost", "hput", "hdelete", "hget_json", "hpost_json", "req", "auth_bearer", "auth_basic", "auth_apikey", "is_ok", "is_error"],
