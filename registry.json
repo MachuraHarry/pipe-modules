@@ -79,6 +79,15 @@
       "versions": {
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
       }
+    },
+    "sqlite": {
+      "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL, DML, SELECT, JOINs, aggregates, transactions, binary persistence",
+      "functions": ["db_open", "db_close", "db_exec", "db_query", "q", "exec", "row_get", "row_eq", "row_ne"],
+      "latest": "0.8.0",
+      "versions": {
+        "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
     }
   }
 }
