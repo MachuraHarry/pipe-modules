@@ -1,0 +1,15 @@
+{
+  "name": "pipe-web",
+  "version": "1.0.0",
+  "description": "Web framework for Pipe — routing, middleware, JSON/text/HTML responses (ASP.NET / Express style)",
+  "author": "MachuraHarry",
+  "license": "MIT",
+  "exports": [
+    "app",
+    "route_get", "post", "put", "delete", "patch", "any",
+    "use",
+    "listen", "serve", "close",
+    "json", "ok", "text", "html", "redirect", "not_found", "internal",
+    "json_body"
+  ]
+}

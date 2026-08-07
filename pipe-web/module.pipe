@@ -1,0 +1,223 @@
+--- ============================================================
+--- pipe-web - Web framework for Pipe (ASP.NET / Express style)
+--- Requires: Pipe v0.8+ (http_server, http_close builtins)
+--- Mode: Tree-Walker (VM not supported -- same as http_server)
+--- Exports: app, get, post, put, delete, patch, any, use,
+---          listen, serve, close,
+---          json, ok, text, html, redirect, not_found, internal,
+---          json_body
+--- ============================================================
+
+--- === Module State ===
+
+__web_state: {app: nil}
+
+--- === Application ===
+
+export fn app name
+    {name: name, routes: [], middleware: []}
+
+--- === Route Registration ===
+
+fn add_route app method path handler
+    routes: get app "routes"
+    push routes {method: method, path: path, handler: handler}
+    app
+
+export fn route_get app path handler
+    add_route app "GET" path handler
+
+export fn post app path handler
+    add_route app "POST" path handler
+
+export fn put app path handler
+    add_route app "PUT" path handler
+
+export fn delete app path handler
+    add_route app "DELETE" path handler
+
+export fn patch app path handler
+    add_route app "PATCH" path handler
+
+export fn any app path handler
+    add_route app "ANY" path handler
+
+--- === Middleware ===
+
+export fn use app mw
+    push (get app "middleware") mw
+
+--- === Response Helpers ===
+
+fn mk_resp status body ctype
+    h: {}
+    set h "Content-Type" ctype
+    {status: status, body: body, headers: h}
+
+export fn json status data
+    mk_resp status (to_json data) "application/json"
+
+export fn ok data
+    json 200 data
+
+export fn text status s
+    mk_resp status s "text/plain"
+
+export fn html status s
+    mk_resp status s "text/html"
+
+export fn redirect status target
+    h: {}
+    set h "Location" target
+    {status: status, headers: h, body: ""}
+
+export fn not_found msg
+    m: "Not Found"
+    if msg != nil
+        m: msg
+    text 404 m
+
+export fn internal msg
+    m: "Internal Server Error"
+    if msg != nil
+        m: msg
+    text 500 m
+
+export fn json_body req
+    parse_json (get req "body")
+
+--- === Path Matching ===
+
+-- Iterative segment-by-segment comparison
+-- Returns params map on match, nil otherwise
+fn try_match parts input
+    plen: len parts
+    ilen: len input
+
+    if plen == 0
+        if ilen == 0
+            {}
+        else
+            nil
+    else
+        params: {}
+        pi: 0
+        ii: 0
+        done: false
+
+        while pi < plen && ii <= ilen && !done
+            pseg: at parts pi
+            if pseg == "*"
+                if ii <= ilen
+                    rest: slice input ii (len input)
+                    set params "*" (join rest "/")
+                pi: plen
+                done: true
+            else
+                if ii >= ilen
+                    params: nil
+                    done: true
+                else
+                    iseg: at input ii
+                    first: substring pseg 0 1
+                    if first == ":"
+                        pname: substring pseg 1 (len pseg)
+                        set params pname iseg
+                    else
+                        if pseg != iseg
+                            params: nil
+                            done: true
+                    if !done
+                        pi: pi + 1
+                        ii: ii + 1
+
+        if done
+            if params != nil
+                if pi >= plen
+                    params
+                else
+                    nil
+            else
+                nil
+        else
+            if pi >= plen && ii >= ilen
+                params
+            else
+                nil
+
+fn match_route rpath reqpath
+    if rpath == reqpath
+        {}
+    else
+        try_match (split rpath "/") (split reqpath "/")
+
+--- === Route Finder ===
+
+-- Iterative search: scans routes array, returns {handler, params} or nil
+fn find_route routes method path
+    result: nil
+    count: len routes
+    i: 0
+    while i < count
+        route: at routes i
+        rmethod: get route "method"
+        if rmethod == method || rmethod == "ANY"
+            params: match_route (get route "path") path
+            if params != nil
+                if result == nil
+                    result: {handler: (get route "handler"), params: params}
+        i: i + 1
+    result
+
+--- === Middleware Runner ===
+
+-- Iterative chain: stops on first response, returns nil if all pass
+fn run_middleware mws req
+    resp: nil
+    count: len mws
+    i: 0
+    while i < count
+        mw: at mws i
+        r: mw req
+        if r != nil
+            if type_of r == "MAP"
+                if resp == nil
+                    resp: r
+        i: i + 1
+    resp
+
+--- === Dispatcher ===
+
+-- Main handler passed to http_server. Called on each incoming request.
+export fn __pipe_web_dispatch req
+    app: get __web_state "app"
+    if app == nil
+        text 500 "Server not initialized"
+    else
+        mw_resp: run_middleware (get app "middleware") req
+        if mw_resp != nil
+            mw_resp
+        else
+            matched: find_route (get app "routes") (get req "method") (get req "path")
+            if matched == nil
+                not_found nil
+            else
+                handler: get matched "handler"
+                params: get matched "params"
+                set req "params" params
+                handler req
+
+--- === Server ===
+
+export fn listen app addr
+    set __web_state "app" app
+    http_server addr __pipe_web_dispatch
+
+export fn serve app addr ms
+    server: listen app addr
+    print ("pipe-web -- http://" ++ addr)
+    sleep ms
+    close server
+
+export fn close server
+    http_close server
