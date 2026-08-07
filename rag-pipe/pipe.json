@@ -1,0 +1,18 @@
+{
+  "name": "rag-pipe",
+  "version": "1.1.0",
+  "description": "RAG pipeline for Pipe — index documents with metadata, semantic search, AI question answering with context",
+  "author": "MachuraHarry",
+  "license": "MIT",
+  "exports": [
+    "index_create",
+    "index_add",
+    "index_add_doc",
+    "index_list",
+    "index_get",
+    "index_delete",
+    "index_count",
+    "index_search",
+    "index_ask"
+  ]
+}
