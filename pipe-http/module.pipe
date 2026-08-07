@@ -1,0 +1,63 @@
+-- ============================================================
+-- pipe-http - HTTP client module for Pipe
+-- Exports: hget, hpost, hput, hdelete, hget_json, hpost_json,
+--          req, auth_bearer, auth_basic, auth_apikey, is_ok, is_error
+-- Requires: Pipe v0.8+ (http_request builtin)
+-- ============================================================
+
+--- === Core === ---
+
+export fn req method url headers body
+    http_request method url headers body
+
+--- === HTTP Methods === ---
+
+export fn hget url headers
+    http_request "GET" url headers ""
+
+export fn hpost url body headers
+    http_request "POST" url headers body
+
+export fn hput url body headers
+    http_request "PUT" url headers body
+
+export fn hdelete url headers
+    http_request "DELETE" url headers ""
+
+--- === JSON Shortcuts === ---
+
+export fn hget_json url headers
+    r: http_request "GET" url headers ""
+    parse_json (get r "body")
+
+export fn hpost_json url body headers
+    r: http_request "POST" url headers body
+    parse_json (get r "body")
+
+--- === Auth Helpers === ---
+
+export fn auth_bearer token
+    h: {}
+    set h "Authorization" ("Bearer " ++ token)
+    h
+
+export fn auth_basic user pass
+    h: {}
+    encoded: base64_encode (user ++ ":" ++ pass)
+    set h "Authorization" ("Basic " ++ encoded)
+    h
+
+export fn auth_apikey key
+    h: {}
+    set h "X-API-Key" key
+    h
+
+--- === Response Helpers === ---
+
+export fn is_ok resp
+    s: get resp "status"
+    s >= 200 && s < 300
+
+export fn is_error resp
+    s: get resp "status"
+    s >= 400

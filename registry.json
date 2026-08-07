@@ -80,6 +80,15 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/parallel-runner/module.pipe"
       }
     },
+    "pipe-http": {
+      "description": "HTTP client with custom headers, auth (Bearer/Basic/API-Key), all HTTP methods, JSON shortcuts",
+      "functions": ["hget", "hpost", "hput", "hdelete", "hget_json", "hpost_json", "req", "auth_bearer", "auth_basic", "auth_apikey", "is_ok", "is_error"],
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe"
+      },
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/pipe-http/module.pipe"
+    },
     "sqlite": {
       "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL, DML, SELECT, JOINs, aggregates, transactions, binary persistence",
       "functions": ["db_open", "db_close", "db_exec", "db_query", "q", "exec", "row_get", "row_eq", "row_ne"],
