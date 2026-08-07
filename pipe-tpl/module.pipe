@@ -65,7 +65,7 @@ fn tokenize tpl
                     rest: slice content 3 (len content)
                     rest: trim rest
                     -- Parse "var in expr"
-                    in_pos: str_index rest " in "
+                    in_pos: index_of rest " in "
                     if in_pos > 0
                         var_name: slice rest 0 in_pos
                         var_name: trim var_name
@@ -90,18 +90,6 @@ fn tokenize tpl
     tokens
 
 --- === Helpers === ---
-
-fn str_index str needle
-    n: len str
-    m: len needle
-    if m == 0
-        return 0
-    i: 0
-    while i <= n - m
-        if slice str i (i + m) == needle
-            return i
-        i: i + 1
-    -1
 
 fn copy_map src
     dst: {}
