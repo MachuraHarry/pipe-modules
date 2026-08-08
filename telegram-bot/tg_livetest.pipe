@@ -1,0 +1,111 @@
+import "module.pipe"
+
+fn check name r
+    if type_of r == "STRING"
+        print (name ++ ": FAIL: " ++ r)
+    else
+        print (name ++ ": OK")
+
+bot: tg_bot nil
+
+chat_id: nil
+target: nil
+from_id: nil
+
+--- wait for a message (up to ~90s)
+i: 0
+while chat_id == nil && i < 30
+    updates: tg_get_updates bot 5
+    for u in updates
+        msg: get u "message"
+        if msg != nil && chat_id == nil
+            chat_id: get (get msg "chat") "id"
+            target: get msg "message_id"
+            from: get msg "from"
+            if from != nil
+                from_id: get from "id"
+    i: i + 1
+
+if chat_id == nil
+    print "NO CHAT - send a message to the bot first"
+else
+    print ("chat_id: " ++ (to_str chat_id))
+    print ("target: " ++ (to_str target))
+
+    r: try
+        tg_get_chat bot chat_id
+    catch e
+        e
+    check "tg_get_chat" r
+
+    r: try
+        tg_send_html bot chat_id "<b>bold</b> and <i>italic</i> via HTML"
+    catch e
+        e
+    check "tg_send_html" r
+
+    r: try
+        tg_send_mdv2 bot chat_id "*bold* and _italic_ via MarkdownV2"
+    catch e
+        e
+    check "tg_send_mdv2" r
+
+    vote_btns: [[{text: "Yes", callback_data: "yes"}, {text: "No", callback_data: "no"}]]
+    r: try
+        tg_send_buttons bot chat_id "Vote:" vote_btns
+    catch e
+        e
+    check "tg_send_buttons" r
+
+    r: try
+        tg_send_chat_action bot chat_id "typing"
+    catch e
+        e
+    check "tg_send_chat_action" r
+
+    r: try
+        tg_reply_text bot chat_id "Replying to your message." target
+    catch e
+        e
+    check "tg_reply_text" r
+
+    sent: try
+        tg_send_text bot chat_id "This will be edited."
+    catch e
+        e
+    if type_of sent == "STRING"
+        print ("edit send: FAIL: " ++ sent)
+    else
+        print "edit send: OK"
+        mid: get sent "message_id"
+        r: try
+            tg_edit_text bot chat_id mid "Edited text!"
+        catch e
+            e
+        check "tg_edit_text" r
+        r: try
+            tg_delete_message bot chat_id mid
+        catch e
+            e
+        check "tg_delete_message" r
+
+    r: try
+        tg_forward_message bot chat_id chat_id target
+    catch e
+        e
+    check "tg_forward_message" r
+
+    r: try
+        tg_set_reaction bot chat_id target "👍"
+    catch e
+        e
+    check "tg_set_reaction" r
+
+    if from_id != nil
+        r: try
+            tg_get_chat_member bot chat_id from_id
+        catch e
+            e
+        check "tg_get_chat_member" r
+
+print "live test done"

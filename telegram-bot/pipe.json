@@ -1,0 +1,30 @@
+{
+  "name": "telegram-bot",
+  "version": "1.1.0",
+  "description": "Telegram Bot API client for Pipe — long polling, text/Markdown/HTML messages, inline keyboards, editing, reactions, chat info (21 exports)",
+  "author": "MachuraHarry",
+  "license": "MIT",
+  "exports": [
+    "tg_bot",
+    "tg_me",
+    "tg_get_updates",
+    "tg_send_text",
+    "tg_send_md",
+    "tg_send_html",
+    "tg_send_mdv2",
+    "tg_reply_text",
+    "tg_send_photo_url",
+    "tg_send_photo_file_id",
+    "tg_send_buttons",
+    "tg_send_chat_action",
+    "tg_edit_text",
+    "tg_edit_md",
+    "tg_edit_html",
+    "tg_delete_message",
+    "tg_forward_message",
+    "tg_set_reaction",
+    "tg_answer_callback_query",
+    "tg_get_chat",
+    "tg_get_chat_member"
+  ]
+}

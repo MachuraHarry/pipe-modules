@@ -1,0 +1,48 @@
+name: Telegram-Notify
+
+on:
+  push:
+    branches: [master]
+  issues:
+    types: [opened, closed, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Telegram-Benachrichtigung senden
+        uses: MachuraHarry/pipe/pipe-action@master
+        with:
+          script: |
+            ev: env "EVENT_NAME"
+            msg: if ev == "push"
+                first: get (split (env "COMMIT_MSG") "\n") 0
+                "🐙 " ++ (env "REPO") ++ " — 📦 Push nach " ++ (env "BRANCH") ++ "\n✏️ " ++ first ++ "\n🔗 " ++ (env "COMMIT_URL")
+            else if ev == "issues"
+                "🐙 " ++ (env "REPO") ++ " — 🗂 Issue " ++ (env "EVENT_ACTION") ++ ": " ++ (env "ISSUE_TITLE") ++ " (#" ++ (env "ISSUE_NUMBER") ++ ")\n🔗 " ++ (env "ISSUE_URL")
+            else
+                "🐙 " ++ (env "REPO")
+            payload: {chat_id: (env "TELEGRAM_CHAT_ID"), text: msg}
+            headers: {}
+            set headers "Content-Type" "application/json"
+            d: parse_json (get (http_request "POST" ("https://api.telegram.org/bot" ++ (env "TELEGRAM_BOT_TOKEN") ++ "/sendMessage") headers (to_json payload)) "body")
+            if (get d "ok") == true
+                print "Telegram-Nachricht gesendet."
+            else
+                raise (get d "description")
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: '8288410155'
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}

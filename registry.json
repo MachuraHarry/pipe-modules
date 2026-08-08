@@ -324,6 +324,38 @@
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
       }
     },
+    "telegram-bot": {
+      "description": "Telegram Bot API client — long polling, text/Markdown/HTML messages, inline keyboards, editing, reactions, chat info",
+      "functions": [
+        "tg_bot",
+        "tg_me",
+        "tg_get_updates",
+        "tg_send_text",
+        "tg_send_md",
+        "tg_send_html",
+        "tg_send_mdv2",
+        "tg_reply_text",
+        "tg_send_photo_url",
+        "tg_send_photo_file_id",
+        "tg_send_buttons",
+        "tg_send_chat_action",
+        "tg_edit_text",
+        "tg_edit_md",
+        "tg_edit_html",
+        "tg_delete_message",
+        "tg_forward_message",
+        "tg_set_reaction",
+        "tg_answer_callback_query",
+        "tg_get_chat",
+        "tg_get_chat_member"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/telegram-bot/module.pipe",
+      "latest": "1.1.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/telegram-bot/module.pipe",
+        "1.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/telegram-bot/module.pipe"
+      }
+    },
     "translate-batch": {
       "description": "Batch translation to any language via AI",
       "functions": [

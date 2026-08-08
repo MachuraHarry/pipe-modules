@@ -1,6 +1,6 @@
 # Pipe Modules — Curated AI Pipeline Library
 
-20 reusable Pipe (SPR) modules for the Semantic Pipeline Runtime.
+21 reusable Pipe (SPR) modules for the Semantic Pipeline Runtime.
 
 ## Available Modules
 
@@ -26,6 +26,7 @@
 | 18 | `pipe-web` | Web framework (ASP.NET / Express style) | `app`, `route_get`, `post`, `put`, `delete`, `use`, `listen`, `serve`, `json`, `ok`, `text`, `html`, `redirect`, `not_found` |
 | 19 | `sqlite` | Pure-Pipe SQL database engine | `db_open`, `db_close`, `db_exec`, `db_query`, `q`, `exec` |
 | 20 | `rag-pipe` | RAG pipeline | `index_create`, `index_add`, `index_add_doc`, `index_list`, `index_get`, `index_delete`, `index_count`, `index_search`, `index_ask` |
+| 21 | `telegram-bot` | Telegram Bot API (long polling) | `tg_bot`, `tg_me`, `tg_get_updates`, `tg_send_text`, `tg_send_md`, `tg_send_html`, `tg_reply_text`, `tg_send_buttons`, `tg_edit_text`, `tg_delete_message`, `tg_set_reaction`, `tg_answer_callback_query`, `tg_get_chat` |
 
 ## Usage
 

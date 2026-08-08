@@ -1,0 +1,130 @@
+--- ============================================================
+--- telegram-bot - Telegram Bot API client for Pipe (long polling)
+--- Requires: Pipe v0.8+ (http_request, parse_json, to_json, env)
+--- Mode: any (pure long-polling script, no special builtins)
+--- Exports: tg_bot, tg_me, tg_get_updates,
+---          tg_send_text, tg_send_md, tg_send_html, tg_send_mdv2,
+---          tg_reply_text, tg_send_photo_url, tg_send_photo_file_id,
+---          tg_send_buttons, tg_send_chat_action,
+---          tg_edit_text, tg_edit_md, tg_edit_html,
+---          tg_delete_message, tg_forward_message, tg_set_reaction,
+---          tg_answer_callback_query, tg_get_chat, tg_get_chat_member
+--- ============================================================
+
+--- === Helpers ===
+
+fn tg_post bot method payload
+    headers: {}
+    set headers "Content-Type" "application/json"
+    resp: try
+        http_request "POST" ((get bot "base") ++ (get bot "token") ++ "/" ++ method) headers (to_json payload)
+    catch e
+        raise ("telegram/" ++ method ++ ": " ++ e)
+    data: parse_json (get resp "body")
+    if (get data "ok") == true
+        get data "result"
+    else
+        d: get data "description"
+        if d == nil
+            d: "unknown error"
+        raise d
+
+fn tg_caption payload caption
+    if caption != nil && caption != ""
+        set payload "caption" caption
+    payload
+
+--- === Bot ===
+
+export fn tg_bot token
+    if token == nil || token == ""
+        token: env "TELEGRAM_BOT_TOKEN"
+        if token == nil || token == ""
+            raise "tg_bot: no token given and TELEGRAM_BOT_TOKEN not set"
+    {token: token, base: "https://api.telegram.org/bot", offset: 0}
+
+--- === Core ===
+
+export fn tg_me bot
+    tg_post bot "getMe" {}
+
+export fn tg_get_updates bot timeout types
+    if types == nil
+        types: ["message", "edited_message", "callback_query"]
+    updates: tg_post bot "getUpdates" {offset: (get bot "offset"), timeout: timeout, allowed_updates: types}
+    if (len updates) > 0
+        last: at updates ((len updates) - 1)
+        set bot "offset" ((get last "update_id") + 1)
+    updates
+
+--- === Sending ===
+
+export fn tg_send_text bot chat_id text
+    tg_post bot "sendMessage" {chat_id: chat_id, text: text}
+
+export fn tg_send_md bot chat_id text
+    tg_post bot "sendMessage" {chat_id: chat_id, text: text, parse_mode: "Markdown"}
+
+export fn tg_send_html bot chat_id text
+    tg_post bot "sendMessage" {chat_id: chat_id, text: text, parse_mode: "HTML"}
+
+export fn tg_send_mdv2 bot chat_id text
+    tg_post bot "sendMessage" {chat_id: chat_id, text: text, parse_mode: "MarkdownV2"}
+
+export fn tg_reply_text bot chat_id text reply_to
+    tg_post bot "sendMessage" {chat_id: chat_id, text: text, reply_to_message_id: reply_to}
+
+export fn tg_send_photo_url bot chat_id url caption
+    p: tg_caption {chat_id: chat_id, photo: url} caption
+    tg_post bot "sendPhoto" p
+
+export fn tg_send_photo_file_id bot chat_id file_id caption
+    p: tg_caption {chat_id: chat_id, photo: file_id} caption
+    tg_post bot "sendPhoto" p
+
+export fn tg_send_buttons bot chat_id text buttons
+    p: {chat_id: chat_id, text: text}
+    set p "reply_markup" {inline_keyboard: buttons}
+    tg_post bot "sendMessage" p
+
+export fn tg_send_chat_action bot chat_id action
+    tg_post bot "sendChatAction" {chat_id: chat_id, action: action}
+
+--- === Editing & Management ===
+
+export fn tg_edit_text bot chat_id message_id text
+    tg_post bot "editMessageText" {chat_id: chat_id, message_id: message_id, text: text}
+
+export fn tg_edit_md bot chat_id message_id text
+    tg_post bot "editMessageText" {chat_id: chat_id, message_id: message_id, text: text, parse_mode: "Markdown"}
+
+export fn tg_edit_html bot chat_id message_id text
+    tg_post bot "editMessageText" {chat_id: chat_id, message_id: message_id, text: text, parse_mode: "HTML"}
+
+export fn tg_delete_message bot chat_id message_id
+    tg_post bot "deleteMessage" {chat_id: chat_id, message_id: message_id}
+
+export fn tg_forward_message bot chat_id from_chat message_id
+    tg_post bot "forwardMessage" {chat_id: chat_id, from_chat_id: from_chat, message_id: message_id}
+
+export fn tg_set_reaction bot chat_id message_id emoji
+    p: {chat_id: chat_id, message_id: message_id}
+    reactions: [{type: "emoji", emoji: emoji}]
+    set p "reaction" reactions
+    tg_post bot "setMessageReaction" p
+
+--- === Callbacks ===
+
+export fn tg_answer_callback_query bot callback_query_id text
+    p: {callback_query_id: callback_query_id}
+    if text != nil && text != ""
+        set p "text" text
+    tg_post bot "answerCallbackQuery" p
+
+--- === Chat ===
+
+export fn tg_get_chat bot chat_id
+    tg_post bot "getChat" {chat_id: chat_id}
+
+export fn tg_get_chat_member bot chat_id user_id
+    tg_post bot "getChatMember" {chat_id: chat_id, user_id: user_id}
