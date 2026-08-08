@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Telegram-Benachrichtigung senden
-        uses: MachuraHarry/pipe/pipe-action@master
+        uses: MachuraHarry/pipe/.github/actions/pipe-action@master
         with:
           version: v0.9.0
           script: |
