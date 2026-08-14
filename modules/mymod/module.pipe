@@ -1,0 +1,5 @@
+--- mymod: TODO description
+--- Version: 0.1.0
+
+export fn hello name
+    "Hello, " ++ name ++ "!"
