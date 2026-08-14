@@ -88,6 +88,15 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
       }
     },
+    "mymod": {
+      "description": "TODO: describe your module",
+      "functions": null,
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mymod/module.pipe",
+      "latest": "0.1.0",
+      "versions": {
+        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mymod/module.pipe"
+      }
+    },
     "parallel-runner": {
       "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
       "functions": [
