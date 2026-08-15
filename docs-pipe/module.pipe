@@ -380,7 +380,7 @@ export fn doc_search idx query k
 
 export fn doc_ask idx question k
     if k == nil
-        k: 3
+        k: 4
     results: doc_search idx question k
     if (len results) == 0
         return {answer: (ask question), sources: []}
@@ -391,8 +391,9 @@ export fn doc_ask idx question k
         context: context ++ "[" ++ (to_str (i + 1)) ++ "] " ++ (get r "path") ++ ":" ++ (to_str (get r "line_start")) ++ " — " ++ (get r "heading") ++ "\n"
         context: context ++ (get r "text") ++ "\n---\n"
         i: i + 1
-    prompt: "You are answering a question about documentation. Use ONLY the context below. If the answer is not in the context, say so. Cite the source numbers [n] in your answer.\n\nContext:\n" ++ context ++ "\nQuestion: " ++ question
-    answer: ask prompt
+    system: "You are a documentation assistant. Answer the user's question thoroughly and in detail, based ONLY on the context provided. Explain clearly and completely, step by step where the question asks how to do something. Include code examples exactly as shown in the context when they are relevant. Do not omit details. Cite the source number [n] after every factual statement. If the context does not contain the answer, say so explicitly and do not guess."
+    user: "Context:\n" ++ context ++ "\nQuestion: " ++ question
+    answer: ai_chat system user
     {answer: answer, sources: results}
 
 export fn doc_reindex idx
