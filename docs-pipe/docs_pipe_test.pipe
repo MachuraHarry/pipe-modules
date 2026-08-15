@@ -1,0 +1,81 @@
+-- docs-pipe test suite (tree-walker mode)
+-- Run with: pipe docs_pipe_test.pipe
+
+ai_provider "deepseek"
+import "sqlite.pipe"
+import "./module.pipe"
+
+--- === Setup === ---
+
+fn setup_docs _
+    base: "/tmp/docs_pipe_test_docs"
+    try
+        remove_dir base
+    catch e
+        print ""
+    make_dir base
+    write_file (base ++ "/a-intro.md") "# Intro\n\nWelcome to Pipe, a pipeline language.\n\n## Philosophy\n\nPipe is minimal and fast.\n\n"
+    write_file (base ++ "/b-vm.md") "# Virtual Machine\n\n## Compiler\n\nThe compiler emits 43 bytecode opcodes.\n\n## Execution\n\nThe VM executes the bytecode.\n\n"
+    write_file (base ++ "/c-ai.md") "# AI Features\n\n## Embeddings\n\nUse `embed` to turn text into vectors.\n\n## Tool Calling\n\nUse `ai_tool` to let the LLM call functions.\n\n"
+    base
+
+--- === Tests === ---
+
+test "doc_index status counts files and chunks"
+    base: setup_docs 0
+    idx: doc_index base {lang: "en", db: ":memory:"}
+    s: doc_index_status idx
+    assert_eq (get s "files") 3
+    assert_gt (get s "chunks") 2
+    assert_eq (get s "lang") "en"
+    doc_close idx
+
+test "doc_search returns cited fields"
+    base: setup_docs 0
+    idx: doc_index base {lang: "en", db: ":memory:"}
+    r: doc_search idx "bytecode opcodes" 3
+    assert_gt (len r) 0
+    first: at r 0
+    assert_not_eq (get first "path") nil
+    assert_not_eq (get first "heading") nil
+    assert_not_eq (get first "text") nil
+    assert_not_eq (get first "score") nil
+    doc_close idx
+
+test "doc_search finds the VM chapter for a VM query"
+    base: setup_docs 0
+    idx: doc_index base {lang: "en", db: ":memory:"}
+    r: doc_search idx "bytecode opcodes compiler" 2
+    found: false
+    i: 0
+    while i < (len r)
+        if contains (get (at r i) "path") "b-vm.md"
+            found: true
+        i: i + 1
+    assert found
+    doc_close idx
+
+test "reindex is a no-op when files are unchanged"
+    base: setup_docs 0
+    idx: doc_index base {lang: "en", db: ":memory:"}
+    s1: doc_index_status idx
+    idx: doc_reindex idx
+    s2: doc_index_status idx
+    assert_eq (get s1 "chunks") (get s2 "chunks")
+    doc_close idx
+
+test "reindex picks up a newly added file"
+    base: setup_docs 0
+    idx: doc_index base {lang: "en", db: ":memory:"}
+    write_file (base ++ "/d-extra.md") "# Extra\n\nA brand new chapter.\n\n"
+    idx: doc_reindex idx
+    s: doc_index_status idx
+    assert_eq (get s "files") 4
+    doc_close idx
+
+test "persistence to a file database"
+    base: setup_docs 0
+    dbp: "/tmp/docs_pipe_test_units.db"
+    idx: doc_index base {lang: "en", db: dbp}
+    doc_close idx
+    assert (file_exists dbp)

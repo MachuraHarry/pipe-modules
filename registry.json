@@ -37,6 +37,22 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/date-formatter/module.pipe"
       }
     },
+    "docs-pipe": {
+      "description": "Documentation-native RAG — heading-aware chunking, hybrid keyword + semantic search, cited AI answers with SQLite persistence",
+      "functions": [
+        "doc_index",
+        "doc_index_status",
+        "doc_search",
+        "doc_ask",
+        "doc_reindex",
+        "doc_close"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/docs-pipe/module.pipe",
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/docs-pipe/module.pipe"
+      }
+    },
     "email-classifier": {
       "description": "Email classification (urgent/important/newsletter/spam/personal)",
       "functions": [

@@ -1,0 +1,418 @@
+-- ============================================================
+-- docs-pipe — Documentation-native RAG for Pipe
+-- v1.0.0
+-- Exports: doc_index, doc_index_status, doc_search, doc_ask,
+--          doc_reindex, doc_close
+-- Requires: pipe -get sqlite
+--
+-- Indexes Markdown documentation (like the docs/ folder) into
+-- heading-aware chunks, stores them in SQLite, and answers
+-- questions with hybrid keyword + semantic retrieval and
+-- source citations.
+-- ============================================================
+
+import "sqlite.pipe"
+
+--- === Helpers === ---
+
+fn esc_sql s
+    replace_all s "'" "''"
+
+fn now_str _
+    format_time (now) "2006-01-02 15:04:05"
+
+fn list_extend target src
+    i: 0
+    while i < (len src)
+        push target (at src i)
+        i: i + 1
+    target
+
+fn detect_lang path
+    if contains path "/en/"
+        return "en"
+    if contains path "/de/"
+        return "de"
+    "auto"
+
+--- === Markdown chunking === ---
+
+fn is_code_fence line
+    if (len line) < 3
+        return false
+    (substring line 0 3) == "```"
+
+fn heading_level line
+    s: trim line
+    lvl: 0
+    i: 0
+    while i < (len s)
+        if (substring s i (i + 1)) == "#"
+            lvl: lvl + 1
+            i: i + 1
+        else
+            break
+    lvl
+
+fn heading_text line
+    s: trim line
+    lvl: heading_level s
+    if lvl == 0
+        return s
+    trim (substring s lvl (len s))
+
+fn push_heading stack level text
+    while (len stack) > 0
+        top: at stack ((len stack) - 1)
+        if (get top "level") >= level
+            pop stack
+        else
+            break
+    push stack {level: level, text: text}
+    stack
+
+fn heading_path stack
+    out: ""
+    i: 0
+    while i < (len stack)
+        if i > 0
+            out: out ++ " > "
+        out: out ++ (get (at stack i) "text")
+        i: i + 1
+    out
+
+fn make_chunk path lang heading start end lines
+    {path: path, lang: lang, heading: heading, line_start: start, line_end: end, text: (join lines "\n")}
+
+fn chunk_file path lang chunk_size
+    lines: read_lines path
+    chunks: []
+    stack: []
+    in_code: false
+    buf: []
+    buf_start: 1
+    buf_chars: 0
+    heading: ""
+    i: 0
+    n: (len lines)
+    while i < n
+        line: at lines i
+        lineno: i + 1
+        if is_code_fence line
+            in_code: not in_code
+        if (not in_code) && (heading_level line) > 0
+            push_heading stack (heading_level line) (heading_text line)
+            heading: heading_path stack
+        push buf line
+        buf_chars: buf_chars + (len line) + 1
+        if buf_chars >= chunk_size
+            push chunks (make_chunk path lang heading buf_start lineno buf)
+            buf: []
+            buf_start: lineno + 1
+            buf_chars: 0
+        i: i + 1
+    if (len buf) > 0
+        push chunks (make_chunk path lang heading buf_start n buf)
+    chunks
+
+--- === File discovery (recursive .md walk) === ---
+
+fn collect_files path
+    out: []
+    t: file_type path
+    if t == "file"
+        if (path_ext path) == ".md"
+            push out path
+        return out
+    entries: list_dir path
+    i: 0
+    while i < (len entries)
+        e: at entries i
+        el: len e
+        if (substring e (el - 1) el) == "/"
+            sub: path_join path (substring e 0 (el - 1))
+            list_extend out (collect_files sub)
+        else
+            if (path_ext e) == ".md"
+                push out (path_join path e)
+        i: i + 1
+    out
+
+--- === Storage (SQLite) === ---
+
+fn insert_chunk h file heading ls le text vec fhash lang
+    created: now_str 0
+    sql: "INSERT INTO chunks (file, heading, line_start, line_end, content, vec, file_hash, lang, created) VALUES ('"
+    sql: sql ++ (esc_sql file) ++ "', '"
+    sql: sql ++ (esc_sql heading) ++ "', "
+    sql: sql ++ (to_str ls) ++ ", "
+    sql: sql ++ (to_str le) ++ ", '"
+    sql: sql ++ (esc_sql text) ++ "', '"
+    sql: sql ++ (esc_sql vec) ++ "', '"
+    sql: sql ++ (esc_sql fhash) ++ "', '"
+    sql: sql ++ (esc_sql lang) ++ "', '"
+    sql: sql ++ created ++ "')"
+    db_exec h sql
+
+fn insert_file h path hash
+    sql: "INSERT INTO files (path, hash) VALUES ('"
+    sql: sql ++ (esc_sql path) ++ "', '"
+    sql: sql ++ (esc_sql hash) ++ "')"
+    db_exec h sql
+
+fn load_cache idx
+    h: get idx "handle"
+    rows: db_query h "SELECT id, file, heading, line_start, line_end, content, vec, lang FROM chunks ORDER BY id"
+    cache: []
+    i: 0
+    while i < (len rows)
+        r: at rows i
+        item: {}
+        set item "id" (get r "id")
+        set item "path" (get r "file")
+        set item "heading" (get r "heading")
+        set item "line_start" (get r "line_start")
+        set item "line_end" (get r "line_end")
+        set item "text" (get r "content")
+        set item "text_lower" (lower (get r "content"))
+        set item "lang" (get r "lang")
+        set item "vec" (parse_json (get r "vec"))
+        push cache item
+        i: i + 1
+    set idx "chunks" cache
+    set idx "df" (build_df cache)
+    if (len cache) > 0
+        set idx "vec_dim" (len (get (at cache 0) "vec"))
+    else
+        set idx "vec_dim" 0
+    idx
+
+fn ensure_schema h
+    try
+        db_exec h "DROP TABLE chunks"
+    catch e
+        print ""
+    try
+        db_exec h "DROP TABLE files"
+    catch e
+        print ""
+    db_exec h "CREATE TABLE chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, file TEXT, heading TEXT, line_start INTEGER, line_end INTEGER, content TEXT, vec TEXT, file_hash TEXT, lang TEXT, created TEXT)"
+    db_exec h "CREATE TABLE files (path TEXT PRIMARY KEY, hash TEXT)"
+
+--- === Incremental single-file indexer === ---
+
+fn index_one_file h lang chunk_size fpath
+    raw: read_file fpath
+    fhash: sha256 raw
+    existing: db_query h ("SELECT hash FROM files WHERE path = '" ++ (esc_sql fpath) ++ "'")
+    if (len existing) > 0
+        if (get (at existing 0) "hash") == fhash
+            return "unchanged"
+        db_exec h ("DELETE FROM chunks WHERE file = '" ++ (esc_sql fpath) ++ "'")
+        db_exec h ("DELETE FROM files WHERE path = '" ++ (esc_sql fpath) ++ "'")
+    fchunks: chunk_file fpath lang chunk_size
+    texts: []
+    i: 0
+    while i < (len fchunks)
+        push texts (get (at fchunks i) "text")
+        i: i + 1
+    vectors: embed_batch texts
+    i: 0
+    while i < (len fchunks)
+        c: at fchunks i
+        vec: at vectors i
+        if (is_list vec) && ((len (get c "text")) > 0)
+            insert_chunk h (get c "path") (get c "heading") (get c "line_start") (get c "line_end") (get c "text") (to_json vec) fhash (get c "lang")
+        i: i + 1
+    insert_file h fpath fhash
+    "indexed"
+
+--- === Public API === ---
+
+export fn doc_index path opts
+    if opts == nil
+        opts: {}
+    chunk_size: get opts "chunk_size"
+    if chunk_size == nil
+        chunk_size: 1200
+    db_path: get opts "db"
+    if db_path == nil
+        db_path: ":memory:"
+    lang: get opts "lang"
+    if lang == nil
+        lang: detect_lang path
+    h: db_open db_path
+    ensure_schema h
+    files: collect_files path
+    i: 0
+    while i < (len files)
+        index_one_file h lang chunk_size (at files i)
+        i: i + 1
+    idx: {handle: h, db: db_path, lang: lang, chunk_size: chunk_size, path: path}
+    load_cache idx
+    idx
+
+export fn doc_index_status idx
+    h: get idx "handle"
+    frows: db_query h "SELECT path FROM files"
+    {files: (len frows), chunks: (len (get idx "chunks")), lang: (get idx "lang")}
+
+export fn doc_close idx
+    db_close (get idx "handle")
+    nil
+
+fn is_stop t
+    stops: split "a an the and or but if of in on at to for with about into is are was were be been being do does did doing how what which who this that these those it its as from by can could should would will not no nor your you we they he she has have had i me my them their there here when where why then than so too very just also using use der die das den dem des ein eine einer einem eines und oder aber wenn von im auf an zu zur zum für mit über ist sind war waren bin bist sein wird werden wie was welche wer dieser diese dieses es ich du er sie wir ihr man nicht kein keine auch als aus bei nach nur schon noch dann da hier dort warum wann" " "
+    contains stops t
+
+fn tokenize text
+    low: lower text
+    cleaned: regex_replace "[^a-z0-9äöüß]+" " " low
+    parts: split cleaned " "
+    out: []
+    i: 0
+    while i < (len parts)
+        t: at parts i
+        if (len t) > 1 && (not (is_stop t))
+            push out t
+        i: i + 1
+    out
+
+fn term_weight t df n
+    dfv: get df t
+    if dfv == nil
+        dfv: 1
+    (n + 1) / (dfv + 1)
+
+fn keyword_denom terms df n
+    sum: 0
+    i: 0
+    while i < (len terms)
+        sum: sum + (term_weight (at terms i) df n)
+        i: i + 1
+    sum
+
+fn keyword_score text_lower terms df n
+    score: 0
+    i: 0
+    while i < (len terms)
+        t: at terms i
+        if contains text_lower t
+            score: score + (term_weight t df n)
+        i: i + 1
+    score
+
+fn build_df chunks
+    df: {}
+    i: 0
+    while i < (len chunks)
+        c: at chunks i
+        toks: tokenize (get c "text")
+        seen: {}
+        j: 0
+        while j < (len toks)
+            t: at toks j
+            if (get seen t) == nil
+                set seen t true
+                cur: get df t
+                if cur == nil
+                    set df t 1
+                else
+                    set df t (cur + 1)
+            j: j + 1
+        i: i + 1
+    df
+
+export fn doc_search idx query k
+    if k == nil
+        k: 5
+    if query == nil || query == ""
+        return []
+    chunks: get idx "chunks"
+    if (len chunks) == 0
+        return []
+    if k > (len chunks)
+        k: (len chunks)
+    qvec: embed query
+    terms: tokenize query
+    df: get idx "df"
+    n: (len chunks)
+    kw_denom: keyword_denom terms df n
+    vec_dim: get idx "vec_dim"
+    sem_w: 0.25
+    kw_w: 0.75
+    if vec_dim > 300
+        sem_w: 0.7
+        kw_w: 0.3
+    scored: []
+    i: 0
+    while i < (len chunks)
+        c: at chunks i
+        sem: cosine_sim qvec (get c "vec")
+        kw: 0
+        if kw_denom > 0
+            kw: (keyword_score (get c "text_lower") terms df n) / kw_denom
+        score: (sem * sem_w) + (kw * kw_w)
+        push scored {c: c, score: score}
+        i: i + 1
+    ordered: sorted_by scored (fn x: (0 - (get x "score")))
+    top: []
+    j: 0
+    while j < k
+        r: at ordered j
+        c: get r "c"
+        result: {}
+        set result "path" (get c "path")
+        set result "heading" (get c "heading")
+        set result "line_start" (get c "line_start")
+        set result "line_end" (get c "line_end")
+        set result "text" (get c "text")
+        set result "score" (get r "score")
+        set result "chunk_id" (get c "id")
+        push top result
+        j: j + 1
+    top
+
+export fn doc_ask idx question k
+    if k == nil
+        k: 3
+    results: doc_search idx question k
+    if (len results) == 0
+        return {answer: (ask question), sources: []}
+    context: ""
+    i: 0
+    while i < (len results)
+        r: at results i
+        context: context ++ "[" ++ (to_str (i + 1)) ++ "] " ++ (get r "path") ++ ":" ++ (to_str (get r "line_start")) ++ " — " ++ (get r "heading") ++ "\n"
+        context: context ++ (get r "text") ++ "\n---\n"
+        i: i + 1
+    prompt: "You are answering a question about documentation. Use ONLY the context below. If the answer is not in the context, say so. Cite the source numbers [n] in your answer.\n\nContext:\n" ++ context ++ "\nQuestion: " ++ question
+    answer: ask prompt
+    {answer: answer, sources: results}
+
+export fn doc_reindex idx
+    path: get idx "path"
+    lang: get idx "lang"
+    chunk_size: get idx "chunk_size"
+    h: get idx "handle"
+    files: collect_files path
+    new_hashes: {}
+    i: 0
+    while i < (len files)
+        fpath: at files i
+        set new_hashes fpath (sha256 (read_file fpath))
+        i: i + 1
+    frows: db_query h "SELECT path FROM files"
+    j: 0
+    while j < (len frows)
+        fp: get (at frows j) "path"
+        if (get new_hashes fp) == nil
+            db_exec h ("DELETE FROM chunks WHERE file = '" ++ (esc_sql fp) ++ "'")
+            db_exec h ("DELETE FROM files WHERE path = '" ++ (esc_sql fp) ++ "'")
+        j: j + 1
+    i: 0
+    while i < (len files)
+        index_one_file h lang chunk_size (at files i)
+        i: i + 1
+    load_cache idx
+    idx

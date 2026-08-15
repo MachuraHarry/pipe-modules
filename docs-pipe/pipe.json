@@ -1,0 +1,18 @@
+{
+  "name": "docs-pipe",
+  "version": "1.0.0",
+  "description": "Documentation-native RAG for Pipe — heading-aware chunking, hybrid keyword + semantic search, cited AI answers with SQLite persistence",
+  "author": "MachuraHarry",
+  "license": "MIT",
+  "dependencies": {
+    "sqlite": "^0.8.0"
+  },
+  "exports": [
+    "doc_index",
+    "doc_index_status",
+    "doc_search",
+    "doc_ask",
+    "doc_reindex",
+    "doc_close"
+  ]
+}
