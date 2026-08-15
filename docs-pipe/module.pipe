@@ -11,7 +11,7 @@
 -- source citations.
 -- ============================================================
 
-import "sqlite.pipe"
+import "sqlite"
 
 --- === Helpers === ---
 

@@ -5,7 +5,7 @@ Markdown documentation tree (like the `docs/` folder) into heading-aware
 chunks, stores them in SQLite, and answers questions with **hybrid keyword +
 semantic retrieval** and **source citations**.
 
-Requires: `pipe -get sqlite && pipe -get docs-pipe`
+Requires: `pipe -get docs-pipe` (pulls `sqlite` automatically via the registry)
 
 ## Why docs-pipe?
 
@@ -55,7 +55,6 @@ pipe -get docs-pipe
 
 ```pipe
 ai_provider "deepseek"      -- local embeddings, DeepSeek for answers
-import "sqlite"
 import "docs-pipe"
 
 -- Index the English docs (persistent)

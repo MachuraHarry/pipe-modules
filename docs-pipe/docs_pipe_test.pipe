@@ -2,7 +2,7 @@
 -- Run with: pipe docs_pipe_test.pipe
 
 ai_provider "deepseek"
-import "sqlite.pipe"
+import "sqlite"
 import "./module.pipe"
 
 --- === Setup === ---
