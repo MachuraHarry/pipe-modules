@@ -175,6 +175,7 @@ fn load_cache idx
         set item "line_end" (get r "line_end")
         set item "text" (get r "content")
         set item "text_lower" (lower (get r "content"))
+        set item "heading_lower" (lower (get r "heading"))
         set item "lang" (get r "lang")
         set item "vec" (parse_json (get r "vec"))
         push cache item
@@ -267,7 +268,7 @@ fn is_stop t
 
 fn tokenize text
     low: lower text
-    cleaned: regex_replace "[^a-z0-9äöüß]+" " " low
+    cleaned: regex_replace "[^a-z0-9äöüß_]+" " " low
     parts: split cleaned " "
     out: []
     i: 0
@@ -292,13 +293,17 @@ fn keyword_denom terms df n
         i: i + 1
     sum
 
-fn keyword_score text_lower terms df n
+fn keyword_score text_lower heading_lower terms df n
     score: 0
     i: 0
     while i < (len terms)
         t: at terms i
-        if contains text_lower t
-            score: score + (term_weight t df n)
+        w: term_weight t df n
+        if contains heading_lower t
+            score: score + (w * 3)
+        else
+            if contains text_lower t
+                score: score + w
         i: i + 1
     score
 
@@ -351,7 +356,7 @@ export fn doc_search idx query k
         sem: cosine_sim qvec (get c "vec")
         kw: 0
         if kw_denom > 0
-            kw: (keyword_score (get c "text_lower") terms df n) / kw_denom
+            kw: (keyword_score (get c "text_lower") (get c "heading_lower") terms df n) / kw_denom
         score: (sem * sem_w) + (kw * kw_w)
         push scored {c: c, score: score}
         i: i + 1
