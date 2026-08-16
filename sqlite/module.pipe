@@ -1066,7 +1066,7 @@ fn parse_join ps
   else
     on_expr: nil
   n: parse_make_node "join"
-  ast_set n "type" join_type
+  ast_set n "join_type" join_type
   ast_set n "table" tab
   if on_expr != nil
     ast_set n "on" on_expr
@@ -1944,7 +1944,7 @@ fn exec_select db node
     while ji < (len from_list)
       join_node: at from_list ji
       jt: ast_type join_node
-      if jt == "inner" || jt == "left" || jt == "right"
+      if jt == "join" || jt == "inner" || jt == "left" || jt == "right"
         tab_ref: ast_get join_node "table"
         jtable: get_table db (ast_get tab_ref "name")
         if jtable == nil
@@ -1953,7 +1953,7 @@ fn exec_select db node
         if jalias == nil
           jalias: ast_get tab_ref "name"
         on_expr: ast_get join_node "on"
-        jtype: ast_get join_node "type"
+        jtype: ast_get join_node "join_type"
 
         jrows: jtable.rows
         jcolnames: jtable.colnames
@@ -2018,6 +2018,7 @@ fn exec_select db node
   -- GROUP BY
   all_aliases: base_aliases
   grouped: false
+  has_agg: false
   groups: {}
   group_keys: []
   if group_by != nil && (len group_by) > 0
@@ -2225,6 +2226,10 @@ fn exec_select db node
       push output out_row
     else
       -- No aggregates: produce one row per input
+      -- Sort the full rows first so ORDER BY may reference columns that are
+      -- not part of the SELECT list (as in SQL).
+      if order_by != nil && (len order_by) > 0
+        filtered: sorted_by filtered (fn o: order_row_key o order_by base_aliases)
       i: 0
       while i < (len filtered)
         row: at filtered i
@@ -2267,15 +2272,16 @@ fn exec_select db node
       i: i + 1
     output: unique
 
-  -- ORDER BY
-  if order_by != nil && (len order_by) > 0
-    -- Sort using built-in sort with comparator
-    -- Since Pipe sort supports comparator functions, build one
-    -- But comparator must be a function. Use sorted_by for simple case.
-    -- For ORDER BY, we need multi-column sort with ASC/DESC per column.
-    -- Build a key function that returns a sortable string
-    all_aliases: base_aliases
-    output: sorted_by output (fn o: order_row_key o order_by all_aliases)
+  -- ORDER BY (aggregate / grouped queries: sort the produced output rows)
+  if grouped || has_agg
+    if order_by != nil && (len order_by) > 0
+      -- Sort using built-in sort with comparator
+      -- Since Pipe sort supports comparator functions, build one
+      -- But comparator must be a function. Use sorted_by for simple case.
+      -- For ORDER BY, we need multi-column sort with ASC/DESC per column.
+      -- Build a key function that returns a sortable string
+      all_aliases: base_aliases
+      output: sorted_by output (fn o: order_row_key o order_by all_aliases)
 
   -- LIMIT / OFFSET
   limit_val: nil
@@ -2315,16 +2321,21 @@ fn order_row_key row order_by aliases
     val: eval_expr expr nil nil row aliases
     val_str: to_str val
     if dir == "desc"
-      -- Invert string for descending sort
-      inv: ""
-      j: 0
-      while j < (len val_str)
-        -- Invert each character: 255 - char code (approximate via Unicode range)
-        -- For ASCII, we use a padding approach
-        inv: inv ++ val_str
-        j: j + 1
-      -- Simpler: pad with leading character that sorts reversed
-      val_str: to_str (999999999999 - val)
+      -- Invert for descending sort: numbers arithmetically, strings bytewise.
+      -- For strings, each byte becomes 255 - code and a terminator (255) is
+      -- appended; the terminator sorts after every inverted byte so that
+      -- prefix relations (short strings < long strings) reverse correctly.
+      if is_num val
+        val_str: to_str (999999999999 - val)
+      else
+        inv: ""
+        b: to_bytes val_str
+        j: 0
+        while j < (len b)
+          code: bytes_to_int b j 1
+          inv: inv ++ (from_bytes (to_bytes ([255 - code])))
+          j: j + 1
+        val_str: inv ++ (from_bytes (to_bytes ([255])))
     if i > 0
       key: key ++ "|"
     key: key ++ val_str
