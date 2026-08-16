@@ -334,10 +334,11 @@
         "row_eq",
         "row_ne"
       ],
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-      "latest": "0.8.0",
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/sqlite/module.pipe",
+      "latest": "0.8.1",
       "versions": {
-        "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+        "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
+        "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/sqlite/module.pipe"
       }
     },
     "telegram-bot": {

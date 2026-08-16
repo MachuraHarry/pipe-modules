@@ -1,0 +1,18 @@
+{
+  "name": "sqlite",
+  "version": "0.8.1",
+  "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL, DML, SELECT, JOINs, aggregates, transactions, binary persistence",
+  "author": "MachuraHarry",
+  "license": "MIT",
+  "exports": [
+    "db_open",
+    "db_close",
+    "db_exec",
+    "db_query",
+    "q",
+    "exec",
+    "row_get",
+    "row_eq",
+    "row_ne"
+  ]
+}
