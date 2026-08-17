@@ -104,6 +104,27 @@
         "1.0.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/log-analyzer/module.pipe"
       }
     },
+    "mqtt": {
+      "description": "MQTT 5.0 client (TCP/TLS, QoS 0/1/2, will, retain, keep-alive, wildcards)",
+      "functions": [
+        "mqtt_connect",
+        "mqtt_disconnect",
+        "mqtt_publish",
+        "mqtt_subscribe",
+        "mqtt_unsubscribe",
+        "mqtt_ping",
+        "mqtt_set_callback",
+        "mqtt_connected",
+        "QOS0",
+        "QOS1",
+        "QOS2"
+      ],
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe",
+      "latest": "0.1.0",
+      "versions": {
+        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe"
+      }
+    },
     "parallel-runner": {
       "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
       "functions": [
