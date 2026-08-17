@@ -119,15 +119,15 @@
         "QOS1",
         "QOS2"
       ],
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe",
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe",
       "latest": "0.1.1",
       "versions": {
-        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe",
-        "0.1.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe"
+        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe",
+        "0.1.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe"
       }
     },
     "parallel-runner": {
-      "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
+      "description": "Run multiple AI queries in parallel using the >> operator",
       "functions": [
         "ask_many",
         "summarize_many",
@@ -356,11 +356,11 @@
         "row_eq",
         "row_ne"
       ],
-      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/sqlite/module.pipe",
+      "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
       "latest": "0.8.1",
       "versions": {
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-        "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/sqlite/module.pipe"
+        "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
       }
     },
     "telegram-bot": {
