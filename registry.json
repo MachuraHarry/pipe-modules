@@ -120,14 +120,15 @@
         "QOS2"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe",
-      "latest": "0.1.1",
+      "latest": "0.2.0",
       "versions": {
         "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe",
-        "0.1.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe"
+        "0.1.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe",
+        "0.2.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/mqtt/module.pipe"
       }
     },
     "parallel-runner": {
-      "description": "Run multiple AI queries in parallel using the >> operator",
+      "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
       "functions": [
         "ask_many",
         "summarize_many",
