@@ -120,9 +120,10 @@
         "QOS2"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe",
-      "latest": "0.1.0",
+      "latest": "0.1.1",
       "versions": {
-        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe"
+        "0.1.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe",
+        "0.1.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/modules/mqtt/module.pipe"
       }
     },
     "parallel-runner": {
