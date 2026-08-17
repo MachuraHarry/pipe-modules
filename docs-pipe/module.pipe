@@ -189,16 +189,8 @@ fn load_cache idx
     idx
 
 fn ensure_schema h
-    try
-        db_exec h "DROP TABLE chunks"
-    catch e
-        print ""
-    try
-        db_exec h "DROP TABLE files"
-    catch e
-        print ""
-    db_exec h "CREATE TABLE chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, file TEXT, heading TEXT, line_start INTEGER, line_end INTEGER, content TEXT, vec TEXT, file_hash TEXT, lang TEXT, created TEXT)"
-    db_exec h "CREATE TABLE files (path TEXT PRIMARY KEY, hash TEXT)"
+    db_exec h "CREATE TABLE IF NOT EXISTS chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, file TEXT, heading TEXT, line_start INTEGER, line_end INTEGER, content TEXT, vec TEXT, file_hash TEXT, lang TEXT, created TEXT)"
+    db_exec h "CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, hash TEXT)"
 
 --- === Incremental single-file indexer === ---
 
