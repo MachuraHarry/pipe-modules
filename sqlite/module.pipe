@@ -102,7 +102,7 @@ fn repeat_char c n
 -- We pre-build the search list once
 fn is_sql_keyword w
   wl: str_lower w
-  kws: split "create,drop,table,insert,into,values,select,from,where,and,or,not,like,in,between,update,set,delete,begin,commit,rollback,transaction,join,inner,left,right,outer,on,group,by,order,asc,desc,limit,offset,count,sum,avg,min,max,as,distinct,primary,key,integer,text,real,blob,boolean,null,default,unique,autoincrement,index,is,exists" ","
+  kws: split "create,drop,table,insert,into,values,select,from,where,and,or,not,like,in,between,update,set,delete,begin,commit,rollback,transaction,join,inner,left,right,outer,on,group,by,order,asc,desc,limit,offset,count,sum,avg,min,max,as,distinct,primary,key,integer,text,real,blob,boolean,null,default,unique,autoincrement,index,is,exists,if" ","
   ki: 0
   while ki < (len kws)
     if (at kws ki) == wl
@@ -1242,6 +1242,12 @@ fn parse_create ps
   parse_expect_kw ps "create"
   if parse_match_kw ps "table"
     parse_advance ps
+    ifne: false
+    if parse_match_kw ps "if"
+      parse_advance ps
+      parse_expect_kw ps "not"
+      parse_expect_kw ps "exists"
+      ifne: true
     name: get (parse_consume ps) "text"
     parse_expect_op ps "("
     cols: []
@@ -1277,6 +1283,7 @@ fn parse_create ps
     n: parse_make_node "create_table"
     ast_set n "name" name
     ast_set n "columns" cols
+    ast_set n "if_not_exists" ifne
     n
   else if parse_match_kw ps "index"
     parse_advance ps
@@ -1683,8 +1690,11 @@ fn index_rebuild_all table
 fn exec_create_table db node
   name: ast_get node "name"
   cols: ast_get node "columns"
+  ifne: ast_get node "if_not_exists"
   tables: db.tables
   if (get tables name) != nil
+    if ifne == true
+      return 0
     db_raise ("Table already exists: " ++ name)
   table: new_table name
   i: 0

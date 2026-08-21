@@ -358,10 +358,11 @@
         "row_ne"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-      "latest": "0.8.1",
+      "latest": "0.8.2",
       "versions": {
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-        "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+        "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
+        "0.8.2": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
       }
     },
     "telegram-bot": {
