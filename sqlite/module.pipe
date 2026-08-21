@@ -44,7 +44,7 @@ fn str_lower s
   r: ""
   i: 0
   while i < (len s)
-    ch: at s i
+    ch: substring s i (i + 1)
     r: r ++ (lower_char ch)
     i: i + 1
   r
@@ -505,7 +505,9 @@ fn sql_lex_peek st
   if p >= (len src)
     ""
   else
-    at src p
+    -- byte-safe single-char access: `at` re-interprets each BYTE as a rune,
+    -- corrupting multi-byte UTF-8 (latin-1 mojibake). substring preserves bytes.
+    substring src p (p + 1)
 
 fn sql_lex_next st
   c: sql_lex_peek st
@@ -594,7 +596,7 @@ fn sql_tokenize input_str
       sql_lex_next st
       continue
     if c == "-"
-      nxt: at (st.sql_src) ((st.pos) + 1)
+      nxt: substring (st.sql_src) ((st.pos) + 1) ((st.pos) + 2)
       if nxt == "-"
         while ((sql_lex_peek st) != "") && ((sql_lex_peek st) != "\n")
           sql_lex_next st
@@ -1547,9 +1549,9 @@ fn eval_like pattern str
     return str == ""
   if str == ""
     return false
-  if (at pattern 0) == "%"
+  if (substring pattern 0 1) == "%"
     pi: 1
-    while pi < (len pattern) && (at pattern pi) == "%"
+    while pi < (len pattern) && (substring pattern pi (pi + 1)) == "%"
       pi: pi + 1
     rest: substring pattern pi (len pattern)
     if rest == ""
@@ -1560,12 +1562,12 @@ fn eval_like pattern str
         return true
       i: i + 1
     false
-  else if (at pattern 0) == "_"
+  else if (substring pattern 0 1) == "_"
     if (len str) == 0
       return false
     return eval_like (substring pattern 1 (len pattern)) (substring str 1 (len str))
   else
-    if (at pattern 0) == (at str 0)
+    if (substring pattern 0 1) == (substring str 0 1)
       return eval_like (substring pattern 1 (len pattern)) (substring str 1 (len str))
     else
       false
