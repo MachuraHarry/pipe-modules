@@ -128,7 +128,7 @@
       }
     },
     "parallel-runner": {
-      "description": "Run multiple AI queries in parallel using the \u003e\u003e operator",
+      "description": "Run multiple AI queries in parallel using the >> operator",
       "functions": [
         "ask_many",
         "summarize_many",
@@ -358,13 +358,13 @@
         "row_ne"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-      "latest": "0.8.3",
+      "latest": "0.8.4",
       "versions": {
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
         "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-        "0.8.2": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
-      ,
-      "0.8.3": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+        "0.8.2": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
+        "0.8.3": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
+        "0.8.4": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
       }
     },
     "telegram-bot": {

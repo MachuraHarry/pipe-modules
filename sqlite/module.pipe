@@ -1289,6 +1289,12 @@ fn parse_create ps
     n
   else if parse_match_kw ps "index"
     parse_advance ps
+    ifne: false
+    if parse_match_kw ps "if"
+      parse_advance ps
+      parse_expect_kw ps "not"
+      parse_expect_kw ps "exists"
+      ifne: true
     idx_name: get (parse_consume ps) "text"
     parse_expect_kw ps "on"
     tab_name: get (parse_consume ps) "text"
@@ -1305,6 +1311,7 @@ fn parse_create ps
     ast_set n "name" idx_name
     ast_set n "table" tab_name
     ast_set n "columns" col_names
+    ast_set n "if_not_exists" ifne
     n
   else
     db_raise "Expected TABLE || INDEX after CREATE"
@@ -1719,6 +1726,10 @@ fn exec_create_index db node
   table: get_table db tab_name
   if table == nil
     db_raise ("Table not found: " ++ tab_name)
+  ifne: ast_get node "if_not_exists"
+  if (get (table.indexes) name) != nil
+    if ifne == true
+      return 0
   index_build table name col_names
   0
 
