@@ -102,7 +102,7 @@ fn repeat_char c n
 -- We pre-build the search list once
 fn is_sql_keyword w
   wl: str_lower w
-  kws: split "create,drop,table,insert,into,values,select,from,where,and,or,not,like,in,between,update,set,delete,begin,commit,rollback,transaction,join,inner,left,right,outer,on,group,by,order,asc,desc,limit,offset,count,sum,avg,min,max,as,distinct,primary,key,integer,text,real,blob,boolean,null,default,unique,autoincrement,index,is,exists,if" ","
+  kws: split "create,drop,alter,add,column,table,insert,into,values,select,from,where,and,or,not,like,in,between,update,set,delete,begin,commit,rollback,transaction,join,inner,left,right,outer,on,group,by,order,asc,desc,limit,offset,count,sum,avg,min,max,as,distinct,primary,key,integer,text,real,blob,boolean,null,default,unique,autoincrement,index,is,exists,if" ","
   ki: 0
   while ki < (len kws)
     if (at kws ki) == wl
@@ -1337,6 +1337,46 @@ fn parse_drop ps
   else
     db_raise "Expected TABLE || INDEX after DROP"
 
+--! ALTER TABLE <name> ADD COLUMN <col> <coltype> [DEFAULT <literal>]
+--! Only the column-add operation is supported.
+fn parse_alter ps
+  parse_expect_kw ps "alter"
+  parse_expect_kw ps "table"
+  name: get (parse_consume ps) "text"
+  if !(parse_match_kw ps "add")
+    db_raise "Only ALTER TABLE ... ADD COLUMN is supported"
+  parse_advance ps
+  if parse_match_kw ps "column"
+    parse_advance ps
+  cname: get (parse_consume ps) "text"
+  ctype: get (parse_consume ps) "text"
+  defv: nil
+  if parse_match_kw ps "default"
+    parse_advance ps
+    if (parse_cur_type ps) == "num"
+      defv: to_num (parse_cur_text ps)
+      parse_advance ps
+    else if (parse_cur_type ps) == "str"
+      defv: parse_cur_text ps
+      parse_advance ps
+    else if (parse_cur_type ps) == "kw"
+      if (parse_cur_text ps) == "null"
+        defv: nil
+      else if (parse_cur_text ps) == "true"
+        defv: true
+      else if (parse_cur_text ps) == "false"
+        defv: false
+      else
+        db_raise ("Unsupported DEFAULT literal: " ++ (parse_cur_text ps))
+      parse_advance ps
+    else
+      db_raise "DEFAULT must be a literal (number, string, NULL, TRUE, FALSE)"
+  n: parse_make_node "alter_table_add_column"
+  ast_set n "name" name
+  ast_set n "column" (new_column cname ctype false false)
+  ast_set n "default" defv
+  n
+
 fn parse_statement ps
   t: parse_cur_type ps
   if t == "kw"
@@ -1351,6 +1391,8 @@ fn parse_statement ps
       parse_delete ps
     else if kw == "create"
       parse_create ps
+    else if kw == "alter"
+      parse_alter ps
     else if kw == "drop"
       parse_drop ps
     else if kw == "begin"
@@ -1731,6 +1773,25 @@ fn exec_create_index db node
     if ifne == true
       return 0
   index_build table name col_names
+  0
+
+--! ALTER TABLE ... ADD COLUMN: appends a column and back-fills existing rows
+--! with the DEFAULT value (or NULL when no DEFAULT was given).
+fn exec_alter_table_add_column db node
+  name: ast_get node "name"
+  table: get_table db name
+  if table == nil
+    db_raise ("Table not found: " ++ name)
+  col: ast_get node "column"
+  if (get_col_index table (col.name)) >= 0
+    db_raise ("duplicate column name: " ++ (col.name))
+  add_column table col
+  defv: ast_get node "default"
+  rows: table.rows
+  i: 0
+  while i < (len rows)
+    push (at rows i) defv
+    i: i + 1
   0
 
 --- === SECTION: Query Engine — DML === ---
@@ -2456,6 +2517,8 @@ export fn db_exec handle sql
       exec_drop_table db stmt
     else if tp == "create_index"
       exec_create_index db stmt
+    else if tp == "alter_table_add_column"
+      exec_alter_table_add_column db stmt
     else if tp == "insert"
       result: exec_insert db stmt
     else if tp == "update"
