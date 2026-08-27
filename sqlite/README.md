@@ -4,7 +4,7 @@ Pure-Pipe relational database engine. Implements a SQLite-compatible SQL subset 
 
 ## Features
 
-- DDL: CREATE TABLE, DROP TABLE, CREATE INDEX
+- DDL: CREATE TABLE, DROP TABLE, CREATE INDEX, ALTER TABLE ADD COLUMN
 - DML: INSERT, UPDATE, DELETE
 - SELECT with WHERE, GROUP BY, ORDER BY, LIMIT/OFFSET, DISTINCT, JOINs (INNER/LEFT/RIGHT)
 - Aggregate functions: COUNT, SUM, AVG, MIN, MAX
@@ -32,6 +32,7 @@ import "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlit
 h: db_open "mydata.db"
 db_exec h "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)"
 db_exec h "INSERT INTO users VALUES (1, 'Alice', 30)"
+db_exec h "ALTER TABLE users ADD COLUMN active INTEGER DEFAULT 1"
 rows: db_query h "SELECT * FROM users WHERE age > 25"
 db_close h
 

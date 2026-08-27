@@ -1,0 +1,73 @@
+--! alter_test.pipe — ALTER TABLE ADD COLUMN tests for the sqlite module.
+--! Run from the sqlite/ directory with:  pipe alter_test.pipe
+
+import "pipe-test"
+import "./module.pipe"
+
+test "alter table add column backfills existing rows with NULL"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY, name TEXT)"
+    db_exec h "INSERT INTO t VALUES (1, 'a')"
+    db_exec h "INSERT INTO t VALUES (2, 'b')"
+    db_exec h "ALTER TABLE t ADD COLUMN age INTEGER"
+    rows: db_query h "SELECT * FROM t"
+    expect_eq (len rows) 2 "two rows preserved"
+    expect_eq (get (at rows 0) "age") nil "new col NULL on existing row 1"
+    expect_eq (get (at rows 1) "age") nil "new col NULL on existing row 2"
+    expect_eq (get (at rows 0) "name") "a" "original column untouched"
+
+test "alter table add column with default literal"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE u (id INTEGER)"
+    db_exec h "INSERT INTO u VALUES (1)"
+    db_exec h "ALTER TABLE u ADD COLUMN level INTEGER DEFAULT 5"
+    db_exec h "ALTER TABLE u ADD COLUMN label TEXT DEFAULT 'x'"
+    rows: db_query h "SELECT * FROM u"
+    expect_eq (get (at rows 0) "level") 5 "numeric default applied to existing row"
+    expect_eq (get (at rows 0) "label") "x" "string default applied to existing row"
+
+test "duplicate column name is rejected"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE v (a INTEGER)"
+    fehler: false
+    try
+        db_exec h "ALTER TABLE v ADD COLUMN a TEXT"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "duplicate column rejected"
+
+test "alter on missing table is rejected"
+    h: db_open ":memory:"
+    fehler: false
+    try
+        db_exec h "ALTER TABLE nope ADD COLUMN x INTEGER"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "missing table rejected"
+
+test "non-add alter is rejected"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE w (a INTEGER)"
+    fehler: false
+    try
+        db_exec h "ALTER TABLE w RENAME TO w2"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "unsupported alter operation rejected"
+
+test "alter column survives save and reload"
+    if file_exists "/tmp/wc_alter_test.db"
+        file_delete "/tmp/wc_alter_test.db"
+    h: db_open "/tmp/wc_alter_test.db"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY, name TEXT)"
+    db_exec h "INSERT INTO t VALUES (1, 'a')"
+    db_exec h "ALTER TABLE t ADD COLUMN active INTEGER DEFAULT 1"
+    db_close h
+    h2: db_open "/tmp/wc_alter_test.db"
+    rows: db_query h2 "SELECT * FROM t"
+    expect_eq (get (at rows 0) "active") 1 "default survives reload"
+    expect_eq (get (at rows 0) "name") "a" "original column survives reload"
+    db_close h2
