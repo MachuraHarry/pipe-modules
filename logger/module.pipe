@@ -1,0 +1,38 @@
+# logger - schlichtes Logging-Modul für Pipe
+#
+# Bietet einfache Level-basierte Logging-Funktionen (debug/info/warn/error)
+# für die Konsole sowie file() zum Anhängen von Zeilen an eine Logdatei.
+
+import format_time
+import now
+
+# Interner Zeitstempel im Format [LEVEL] YYYY-MM-DD HH:MM:SS
+fn _stamp(level, msg) {
+    ts = now()
+    return "[" + level + "] " + ts + " " + msg
+}
+
+# Debug-Meldung auf der Konsole ausgeben
+export fn debug(msg) {
+    print(_stamp("DEBUG", msg))
+}
+
+# Info-Meldung auf der Konsole ausgeben
+export fn info(msg) {
+    print(_stamp("INFO", msg))
+}
+
+# Warnung auf der Konsole ausgeben
+export fn warn(msg) {
+    print(_stamp("WARN", msg))
+}
+
+# Fehler auf der Konsole ausgeben
+export fn error(msg) {
+    print(_stamp("ERROR", msg))
+}
+
+# Zeile an eine Logdatei anhängen
+export fn file(path, msg) {
+    append_file(path, _stamp("FILE", msg))
+}

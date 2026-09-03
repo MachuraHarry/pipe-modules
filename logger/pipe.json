@@ -1,0 +1,7 @@
+{
+  "name": "logger",
+  "version": "0.1.0",
+  "description": "Schlichtes Level-basiertes Logging-Modul für Pipe",
+  "main": "module.pipe",
+  "exports": ["debug", "info", "warn", "error", "file"]
+}
