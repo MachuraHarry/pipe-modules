@@ -1,0 +1,10 @@
+# Beispiel: logger-Modul verwenden
+import logger as log
+
+log.info("Pipe gestartet")
+log.debug("Lade Konfiguration")
+log.warn("Veraltetes Format erkannt")
+log.error("Kritischer Fehler")
+
+# Zeile an Datei anhängen
+log.file("/tmp/app.log", "Startup abgeschlossen")
