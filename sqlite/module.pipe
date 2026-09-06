@@ -1860,6 +1860,33 @@ fn exec_insert db node
         set table "next_rowid" ((table.next_rowid) + 1)
       i: i + 1
 
+    -- Primary-key uniqueness + counter healing (v0.8.6): an explicit PK
+    -- value colliding with an existing row is rejected instead of stored
+    -- as a silent duplicate (real SQLite raises UNIQUE constraint
+    -- failed). An explicit numeric value >= next_rowid advances the
+    -- counter, so later auto-inserts can't collide with copied rows
+    -- (e.g. after DROP+CREATE copy-migrations with explicit ids).
+    -- Linear scan per insert — acceptable for this engine class.
+    pi: 0
+    pk_idx: -1
+    while pi < ncols
+      pcol: at cols_info pi
+      if (pcol.pk)
+        pk_idx: pi
+      pi: pi + 1
+    if pk_idx >= 0
+      pk_val: at row pk_idx
+      if pk_val != nil
+        for erow in rows
+          if (to_str (at erow pk_idx)) == (to_str pk_val)
+            db_raise ("UNIQUE constraint failed: " ++ tab_name ++ "." ++ (get (at cols_info pk_idx) "name"))
+        --! to_num throws on non-numeric text (no nil) — hence guarded.
+        try
+          if (to_num pk_val) >= (table.next_rowid)
+            set table "next_rowid" ((to_num pk_val) + 1)
+        catch e_pk_num
+          nil
+
     push rows row
     affected: affected + 1
     vi: vi + 1

@@ -1,0 +1,81 @@
+--! pk_test.pipe — PRIMARY KEY uniqueness + autoincrement counter tests.
+--! Run from the sqlite/ directory with:  pipe pk_test.pipe
+
+import "pipe-test"
+import "./module.pipe"
+
+test "duplicate primary key is rejected"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY, name TEXT)"
+    db_exec h "INSERT INTO t VALUES (1, 'a')"
+    fehler: false
+    try
+        db_exec h "INSERT INTO t VALUES (1, 'b')"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "duplicate pk rejected"
+    rows: db_query h "SELECT * FROM t"
+    expect_eq (len rows) 1 "no silent duplicate stored"
+
+test "duplicate primary key is rejected with explicit column list"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY, name TEXT)"
+    db_exec h "INSERT INTO t (id, name) VALUES (7, 'a')"
+    fehler: false
+    try
+        db_exec h "INSERT INTO t (name, id) VALUES ('b', 7)"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "duplicate pk rejected (reordered columns)"
+
+test "explicit high id advances the counter"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY AUTOINCREMENT, v TEXT)"
+    db_exec h "INSERT INTO t (id, v) VALUES (10, 'kept')"
+    db_exec h "INSERT INTO t (v) VALUES ('auto1')"
+    db_exec h "INSERT INTO t (v) VALUES ('auto2')"
+    rows: db_query h "SELECT id FROM t ORDER BY id"
+    expect_eq (get (at rows 0) "id") 10 "explicit id kept"
+    expect_eq (get (at rows 1) "id") 11 "counter continued, no collision"
+    expect_eq (get (at rows 2) "id") 12 "counter keeps going"
+
+test "counter survives drop and recreate with copied rows"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY AUTOINCREMENT, v TEXT)"
+    db_exec h "INSERT INTO t (v) VALUES ('a')"
+    db_exec h "INSERT INTO t (v) VALUES ('b')"
+    db_exec h "DROP TABLE t"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY AUTOINCREMENT, v TEXT)"
+    db_exec h "INSERT INTO t (id, v) VALUES (1, 'a')"
+    db_exec h "INSERT INTO t (id, v) VALUES (2, 'b')"
+    db_exec h "INSERT INTO t (v) VALUES ('c')"
+    rows: db_query h "SELECT id FROM t ORDER BY id"
+    expect_eq (len rows) 3 "three rows, no duplicates"
+    expect_eq (get (at rows 2) "id") 3 "copied ids heal the counter"
+
+test "normal inserts without pk are unaffected"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (id INTEGER PRIMARY KEY AUTOINCREMENT, v TEXT)"
+    db_exec h "INSERT INTO t (v) VALUES ('a')"
+    db_exec h "INSERT INTO t (v) VALUES ('b')"
+    db_exec h "INSERT INTO t (v) VALUES ('c')"
+    rows: db_query h "SELECT id FROM t ORDER BY id"
+    expect_eq (get (at rows 0) "id") 1 "first id"
+    expect_eq (get (at rows 2) "id") 3 "third id"
+
+test "text primary key uniqueness is enforced"
+    h: db_open ":memory:"
+    db_exec h "CREATE TABLE t (name TEXT PRIMARY KEY, age INTEGER)"
+    db_exec h "INSERT INTO t VALUES ('alice', 30)"
+    fehler: false
+    try
+        db_exec h "INSERT INTO t VALUES ('alice', 31)"
+        fehler: true
+    catch
+        nil
+    expect_eq fehler false "duplicate text pk rejected"
+    db_exec h "INSERT INTO t VALUES ('bob', 25)"
+    rows: db_query h "SELECT * FROM t"
+    expect_eq (len rows) 2 "distinct keys coexist"

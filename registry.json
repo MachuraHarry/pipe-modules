@@ -345,7 +345,7 @@
       }
     },
     "sqlite": {
-      "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL (incl. ALTER TABLE ADD COLUMN), DML, SELECT, JOINs, aggregates, transactions, binary persistence",
+      "description": "Pure-Pipe relational database engine — SQLite-compatible SQL with DDL (incl. ALTER TABLE ADD COLUMN), DML, SELECT, JOINs, aggregates, transactions, binary persistence, PRIMARY KEY uniqueness + autoincrement healing",
       "functions": [
         "db_open",
         "db_close",
@@ -358,14 +358,15 @@
         "row_ne"
       ],
       "url": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-      "latest": "0.8.5",
+      "latest": "0.8.6",
       "versions": {
         "0.8.0": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
         "0.8.1": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
         "0.8.2": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
         "0.8.3": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
         "0.8.4": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
-        "0.8.5": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
+        "0.8.5": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe",
+        "0.8.6": "https://raw.githubusercontent.com/MachuraHarry/pipe-modules/master/sqlite/module.pipe"
       }
     },
     "telegram-bot": {
