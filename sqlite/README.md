@@ -6,6 +6,7 @@ Pure-Pipe relational database engine. Implements a SQLite-compatible SQL subset 
 
 - DDL: CREATE TABLE, DROP TABLE, CREATE INDEX, ALTER TABLE ADD COLUMN
 - DML: INSERT, UPDATE, DELETE
+- PRIMARY KEY uniqueness enforced (duplicate inserts raise `UNIQUE constraint failed`); explicit high IDs advance the autoincrement counter
 - SELECT with WHERE, GROUP BY, ORDER BY, LIMIT/OFFSET, DISTINCT, JOINs (INNER/LEFT/RIGHT)
 - Aggregate functions: COUNT, SUM, AVG, MIN, MAX
 - Transactions: BEGIN, COMMIT, ROLLBACK
